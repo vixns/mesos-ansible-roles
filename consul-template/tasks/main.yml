@@ -1,0 +1,29 @@
+---
+
+- name: install consul-template
+  unarchive: src=https://releases.hashicorp.com/consul-template/0.14.0/consul-template_0.14.0_linux_amd64.zip
+             dest=/usr/bin
+             copy=no
+             creates=/usr/bin/consul-template
+  notify:
+    - restart consul-template
+
+- name: create consul-template directories
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/sv/consul-template
+    - /etc/consul-template/conf.d
+    - /etc/consul-template/templates.d
+
+- name: update consul-template run file
+  template: src=run.sh.j2 dest=/etc/sv/consul-template/run mode=0755
+  notify:
+    - restart consul-template
+
+- name: consul-template default config files
+  copy: src=default.conf dest=/etc/consul-template/conf.d/01-default.conf
+  notify:
+    - reload consul-template
+
+- name: configure consul-template service
+  runit: name=consul-template enabled=true state=up timeout=9 user='root' auto=no has_log=no

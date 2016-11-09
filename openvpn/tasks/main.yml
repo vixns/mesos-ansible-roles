@@ -1,0 +1,44 @@
+---
+- name: install openvpn
+  apt: name={{item}} state=latest default_release=jessie-backports install_recommends=no
+  with_items: 
+    - openvpn
+  tags:
+    - vpn
+
+- name: configure iptables vpn nat rules
+  iptables: table=nat chain=POSTROUTING source=10.{{vpn_id}}.0.0/24 jump=MASQUERADE
+  tags:
+    - vpn
+
+- name: update openvpn config file
+  template: src=openvpn.conf.j2 dest=/etc/openvpn/openvpn.conf mode=0640
+  notify:
+    - restart openvpn
+  tags:
+    - vpn
+
+- name: disable sysv openvpn service
+  service: name=openvpn state=stopped enabled=no
+  tags:
+    - vpn
+
+- name: create openvpn service dir
+  file: state=directory path={{item}}
+  with_items:
+    - /etc/sv/openvpn
+    - /etc/openvpn
+  tags:
+    - vpn
+
+- name: update openvpn run file
+  copy: src=run.sh dest=/etc/sv/openvpn/run mode=0755
+  notify:
+    - restart openvpn
+  tags:
+    - vpn
+
+- name: configure openvpn service
+  runit: name=openvpn enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - vpn

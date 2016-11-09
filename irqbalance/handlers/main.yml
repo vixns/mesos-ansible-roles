@@ -1,0 +1,3 @@
+- name: restart irqbalance
+  command: sv restart irqbalance
+  

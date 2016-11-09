@@ -1,0 +1,8 @@
+---
+mesos_log_dir: /var/log/mesos
+mesos_work_dir: /var/lib/mesos
+mesos_tls: false
+mesos_tls_mixed: true
+mesos_key_file: /etc/mesos/mesos.key
+mesos_cert_file: /etc/mesos/mesos.pem
+mesos_extra_resources: ""

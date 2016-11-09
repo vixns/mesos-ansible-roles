@@ -1,0 +1,6 @@
+#!/bin/sh
+ETCD_KEY_FILE=/etc/etcd/client.key \
+ETCD_CERT_FILE=/etc/etcd/client.crt \
+ETCD_CA_CERT_FILE=/etc/etcd/ca.crt \
+ETCD_ENDPOINTS="{% for host in groups['masters'] %}http{% if etcd_tls_clients %}s{% endif %}://{{ hostvars[host].inventory_hostname }}:2379{% if not loop.last %},{% endif %}{% endfor %}" \
+/usr/bin/calicoctl.bin $@

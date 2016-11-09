@@ -1,0 +1,186 @@
+{
+  "template": "*",
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1,
+    "index": {
+      "query": {
+        "default_field": "description"
+      },
+      "store": {
+        "compress": {
+          "stored": true,
+          "tv": true
+        }
+      }
+    }
+  },
+  "mappings": {
+    "_default_": {
+      "_all": {
+        "enabled": false
+      },
+      "_source": {
+        "compress": true
+      },
+      "dynamic_templates": [
+        {
+          "string_template": {
+            "match": "*",
+            "mapping": {
+              "type": "string",
+              "index": "not_analyzed"
+            },
+            "match_mapping_type": "string"
+          }
+        }
+      ],
+      "properties": {
+        "@timestamp": {
+          "type": "date",
+          "format": "dateOptionalTime",
+          "index": "not_analyzed"
+        },
+        "description": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "message": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "service": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "host": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "metric": {
+          "type": "double"
+        },
+        "org": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "ident": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "state": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "status": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "tags": {
+          "type": "string"
+        },
+        "facility": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "priority": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "user": {
+          "type": "string",
+          "index": "not_analyzed"
+        }
+      }
+    },
+    "syslog": {
+      "properties": {
+        "msgid": {
+          "type": "string",
+          "index": "not_analyzed"
+        },
+        "pid": {
+          "ignore_malformed": true,
+          "type": "integer",
+          "index": "analyzed"
+        },
+        "struct": {
+          "type": "string",
+          "index": "analyzed"
+        }
+      }
+    },
+    "http-request": {
+      "properties": {
+        "duration": {
+          "ignore_malformed": true,
+          "type": "double",
+          "index": "not_analyzed"
+        },
+        "resptime": {
+          "ignore_malformed": true,
+          "type": "double",
+          "index": "not_analyzed"
+        },
+        "returncode": {
+          "type": "integer",
+          "index": "not_analyzed"
+        },
+        "bytes": {
+          "type": "double",
+          "index": "not_analyzed"
+        },
+        "vhost": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "clientip": {
+          "ignore_malformed": true,
+          "type": "ip",
+          "index": "not_analyzed"
+        },
+        "proxy": {
+          "ignore_malformed": true,
+          "type": "ip",
+          "index": "analyzed"
+        },
+        "verb": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "agent": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "uri": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "referer": {
+          "type": "string",
+          "index": "analyzed"
+        },
+        "auth": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        },
+        "httpversion": {
+          "type": "string",
+          "doc_values": true,
+          "index": "not_analyzed"
+        }
+      }
+    }
+  }
+}

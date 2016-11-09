@@ -1,0 +1,49 @@
+- hosts: all
+  sudo: true
+  roles:
+    - {role: runit}
+
+  tasks:
+  - name: install - create group
+    group:
+      name=myservice
+      system=yes
+
+  - name: install - create user
+    user:
+      name=myservice
+      group=myservice
+      system=yes
+      createhome=no
+
+  - name: place file to run
+    copy: 
+      src=testrun.sh 
+      dest=/opt/runme 
+      mode=0755
+      owner=myservice
+      group=myservice
+
+  - name: create log dir
+    file: 
+      state=directory 
+      path=/var/log/myservice
+      mode=0755
+      owner=myservice
+      group=myservice
+
+  - pause: seconds=10
+
+  - name: test runit
+    runit:
+      name: myservice
+      enabled: yes
+      state: start
+      timeout: 7
+      user: myservice
+      group: myservice
+      command: '/opt/runme'
+      commands_setup:
+        - echo line1
+        - echo line2
+

@@ -1,0 +1,131 @@
+---
+#mesos-agent --resources=file:///etc/mesos/resources.json --attributes=type:agent 
+
+- name: download hadoop binaries
+  unarchive: src=http://mirrors.ircam.fr/pub/apache/hadoop/common/hadoop-2.7.2/hadoop-2.7.2.tar.gz dest=/opt copy=no owner=root creates=/opt/hadoop-2.7.2
+  tags:
+    - mesos
+
+- name: add hadoop link
+  file: src=/opt/hadoop-2.7.2 dest=/opt/hadoop state=link
+  tags:
+    - mesos
+
+- name: download prometheus mesos exporter
+  copy: src=mesos_exporter dest=/opt/mesos-exporter mode=0755
+  tags:
+    - mesos
+    
+- name: create mesos-agent and mesos exporter service and config dirs
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/sv/mesos-agent
+    - /etc/sv/mesos-exporter
+    - /etc/sv/local-persist
+    - /etc/sv/netshare
+    - /etc/mesos-agent
+    - /var/lib/docker/plugin-data
+  tags:
+    - mesos
+
+- name: set mesos-agent config files
+  copy: src={{item}} dest=/etc/mesos-agent/{{item}} mode=0644
+  with_items:
+    - logging_level
+    - '?quiet'
+    - '?no-systemd_enable_support'
+    - '?no-hostname_lookup'
+    - container_logger
+    - containerizers
+    - image_providers
+    - image_provisioner_backend
+    - modules
+    - isolation
+    - credential
+    - hadoop_home
+    - launcher_dir
+    - resources
+    - docker_config
+    - docker_registry
+    - network_cni_config_dir
+    - network_cni_plugins_dir
+    - appc_store_dir
+    - docker_store_dir
+    - fetcher_cache_dir
+  tags:
+    - mesos
+
+- name: set mesos-agent config files (from templates)
+  template: src={{item}}.j2 dest=/etc/mesos-agent/{{item}} mode=0644
+  with_items:
+    - master
+    - work_dir
+    - log_dir
+    - attributes
+    - advertise_ip
+    - hostname
+  tags:
+    - mesos
+
+- name: set mesos json config files
+  template: src={{item}}.json.j2 dest=/etc/mesos/{{item}}.json mode=0644
+  with_items:
+    - resources
+    - docker
+    - agent-modules
+  tags:
+    - mesos
+
+- name: install dvdcli
+  copy: src=dvdcli dest=/usr/bin/dvdcli mode=0755
+  tags:
+    - mesos
+
+- name: install docker volume plugins
+  copy: src={{item}} dest=/usr/bin/{{item}} mode=0755
+  with_items: 
+    - docker-local-persist
+    - docker-volume-netshare
+    - clean-docker-store
+    - mesos-enter
+    - mesos-enter-ip
+  tags:
+    - mesos
+    - wip6
+
+- name: update docker volume plugins run files
+  copy: src={{item}}.sh dest=/etc/sv/{{item}}/run mode=0755
+  with_items: 
+    - local-persist
+    - netshare
+  tags:
+    - mesos
+
+- name: configure docker volume plugins services 
+  runit: name={{item}} enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  with_items: 
+    - local-persist
+    - netshare
+  tags:
+    - mesos
+
+- name: update mesos-agent run file
+  template: src=run.sh.j2 dest=/etc/sv/mesos-agent/run mode=0755
+  tags:
+    - mesos
+
+- name: configure mesos-agent service
+  runit: name=mesos-agent enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - mesos
+
+- name: update mesos-exporter run file
+  template: src=exporter-run.sh.j2 dest=/etc/sv/mesos-exporter/run mode=0755
+  notify: restart mesos-exporter
+  tags:
+    - mesos
+
+- name: configure mesos-exporter service
+  runit: name=mesos-exporter enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - mesos

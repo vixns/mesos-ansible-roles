@@ -1,0 +1,59 @@
+---
+- name: install consul
+  unarchive: src=https://releases.hashicorp.com/consul/0.7.0/consul_0.7.0_linux_amd64.zip
+             dest=/usr/bin
+             copy=no
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: create consul directories
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/sv/consul
+    - /etc/consul.d
+  tags:
+    - consul
+
+- name: install python-consul
+  pip: name={{ item }}
+  with_items:
+    - python-consul
+    - requests
+  tags:
+    - consul
+
+- name: consul agent config file
+  template: src=agent.json.j2 dest=/etc/consul.d/20-agent.json mode=0600
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: update consul run file
+  template: src=run.sh.j2 dest=/etc/sv/consul/run mode=0755
+  notify:
+    - restart consul
+  tags:
+    - consul
+
+- name: configure consul service
+  runit: name=consul enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - consul
+
+- name: configure search domain
+  lineinfile: dest=/etc/resolv.conf regexp=^search line='search service.{{consul_domain}} vixns.net'
+  tags:
+    - consul
+
+- name: update unbound consul config file
+  template: src={{item}}.j2 dest=/etc/unbound/unbound.conf.d/{{item}} mode=0640
+  when: consul_domain is defined
+  with_items:
+    - unbound.conf
+  notify:
+    - restart unbound
+  tags:
+    - unbound

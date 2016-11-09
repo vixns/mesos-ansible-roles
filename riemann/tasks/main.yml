@@ -1,0 +1,50 @@
+---
+- name: create consul-template dir for riemann
+  file: state=directory path=/etc/consul-template/templates.d/riemann
+
+- name: install riemann/kafka consul-template template
+  copy: src=kafka.tmpl dest=/etc/consul-template/templates.d/riemann/kafka.tmpl
+  notify:
+    - reload consul-template
+
+- name: install riemann/es consul-template template
+  copy: src=elasticsearch.tmpl dest=/etc/consul-template/templates.d/riemann/elasticsearch.tmpl
+  notify:
+    - reload consul-template
+
+- name: install riemann consul-template config
+  copy: src=riemann.hcl dest=/etc/consul-template/conf.d/riemann.hcl
+  notify:
+    - reload consul-template
+
+- name: create riemann config dir
+  file: state=directory path=/srv/config/riemann/config/
+
+- name: create riemann streams config dir
+  file: state=directory path=/srv/config/riemann/streams/
+
+- name: install es default mapping
+  copy: src=default-mapping.json dest=/srv/config/riemann/config/default-mapping.json
+  notify:
+    - reload riemann
+
+- name: install riemann default config
+  copy: src=common.config dest=/srv/config/riemann/config/common.config
+  notify:
+    - reload riemann
+
+- name: install riemann logs config
+  copy: src=logs.clj dest=/srv/config/riemann/streams/20-logs.clj
+  notify:
+    - reload riemann
+
+- name: install riemann collectd config
+  copy: src=collectd.clj dest=/srv/config/riemann/streams/collectd.clj
+  notify:
+    - reload riemann
+
+- name: install riemann artestudio config
+  copy: src=artestudio.clj dest=/srv/config/riemann/streams/02-artestudiolab.clj
+  notify:
+    - reload riemann
+

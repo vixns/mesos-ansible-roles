@@ -1,0 +1,4 @@
+---
+- name: reload riemann
+  command: |
+    sh -c "for c in $(docker ps -q --filter='label=riemann');do docker kill -s 1 $c;done || true"

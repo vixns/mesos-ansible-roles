@@ -1,0 +1,22 @@
+#!/bin/bash
+exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec /usr/bin/etcd \
+  --name {{ansible_hostname}} \
+  --initial-cluster-state new \
+  --initial-cluster-token {{ etcd_cluster_token }} \
+  --listen-client-urls http{% if etcd_tls_clients %}s{% endif %}://0.0.0.0:2379 \
+  --advertise-client-urls http{% if etcd_tls_clients %}s{% endif %}://{{inventory_hostname}}:2379 \
+{% if etcd_tls_clients %}
+  --client-cert-auth \
+  --trusted-ca-file=/etc/etcd/ca.crt \
+  --cert-file=/etc/etcd/client.crt \
+  --key-file=/etc/etcd/client.key \
+{% endif %}
+  --initial-cluster {% for host in groups['masters'] %}{{hostvars[host].ansible_hostname}}=https://{{ hostvars[host].inventory_hostname }}:2380{% if not loop.last %},{% endif %}{% endfor %} \
+  --initial-advertise-peer-urls https://{{ inventory_hostname }}:2380 \
+  --listen-peer-urls https://0.0.0.0:2380 \
+  --peer-client-cert-auth \
+  --peer-trusted-ca-file=/etc/etcd/ca.crt \
+  --peer-cert-file=/etc/etcd/peer.crt \
+  --peer-key-file=/etc/etcd/peer.key

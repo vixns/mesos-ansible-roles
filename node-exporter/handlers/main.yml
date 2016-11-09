@@ -1,0 +1,5 @@
+---
+- name: reload node-exporter
+  command: sv reload node-exporter
+- name: restart node-exporter
+  command: sv restart node-exporter

@@ -1,0 +1,78 @@
+---
+
+- name: create mesos-master service and config dirs
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/sv/mesos-master
+    - /etc/sv/mesos-dns    
+    - /etc/mesos-master
+  tags:
+    - mesos
+
+- name: set mesos-master config files
+  copy: src={{item}} dest=/etc/mesos-master/{{item}} mode=0600
+  with_items:
+    - registry
+    - quorum
+    - logging_level
+    - '?quiet'
+    - '?authenticate_frameworks'
+    - '?authenticate_agents'
+    - credentials
+    - acls
+# TODO : rolling update
+  notify:
+    - restart mesos-master
+  tags:
+    - mesos
+
+- name: set mesos-master config files (from templates)
+  template: src={{item}}.j2 dest=/etc/mesos-master/{{item}} mode=0600
+  with_items:
+    - cluster
+    - zk
+    - work_dir
+    - log_dir
+# TODO : rolling update
+  notify:
+    - restart mesos-master
+  tags:
+    - mesos
+
+- name: update mesos-master run file
+  template: src=run.sh.j2 dest=/etc/sv/mesos-master/run mode=0755
+# TODO : rolling update
+  notify:
+    - restart mesos-master
+  tags:
+    - mesos
+
+- name: configure mesos-master service
+  runit: name=mesos-master enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - mesos
+
+- name: download mesos-dns
+  get_url: url=https://github.com/mesosphere/mesos-dns/releases/download/v0.6.0/mesos-dns-v0.6.0-linux-amd64 dest=/usr/bin/mesos-dns mode=0755 checksum=md5:a00f1e3381e0cb3b092eefc1bf81ea98
+  tags:
+    - mesos
+
+- name: configure mesos-dns
+  template: src=mesos-dns.json.j2 dest=/etc/mesos/dns.json mode=0644
+  notify:
+    - restart mesos-dns
+  tags:
+    - mesos
+
+- name: update mesos-dns run file
+  copy: src=mesos-dns.sh dest=/etc/sv/mesos-dns/run mode=0755
+# TODO : rolling update
+  notify:
+    - restart mesos-dns
+  tags:
+    - mesos
+
+- name: configure mesos-dns service
+  runit: name=mesos-dns enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - mesos

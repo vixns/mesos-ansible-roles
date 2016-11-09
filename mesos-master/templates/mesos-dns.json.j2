@@ -1,0 +1,27 @@
+{
+  "zk": "{{ zk_uri }}/mesos",
+  "masters": [
+  {% for host in groups['masters'] %}
+  "{{ hostvars[host].inventory_hostname }}:5050"{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ],
+  "refreshSeconds": 10,
+  "ttl": 10,
+  "domain": "{{mesos_domain}}",
+  "port": 5353,
+  "timeout": 5,
+  "httpon": false,
+  "dnson": true,
+  "externalon": false,
+  "SOAMname": "ns1.{{mesos_domain}}",
+  "SOARname": "root.ns1.{{mesos_domain}}",
+  "SOARefresh": 60,
+  "SOARetry": 600,
+  "SOAExpire": 86400,
+  "SOAMinttl": 60,
+  "IPSources": [
+    "netinfo",
+    "mesos",
+    "host"
+  ]
+}

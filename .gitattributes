@@ -1,0 +1,15 @@
+marathon/files/marathon filter=lfs diff=lfs merge=lfs -text
+marathon/files/marathonctl filter=lfs diff=lfs merge=lfs -text
+exhibitor/files/exhibitor-1.5.6.jar filter=lfs diff=lfs merge=lfs -text
+mesos-agent/files/docker-local-persist filter=lfs diff=lfs merge=lfs -text
+mesos-agent/files/docker-volume-netshare filter=lfs diff=lfs merge=lfs -text
+etcd/files/etcdctl filter=lfs diff=lfs merge=lfs -text
+etcd/files/etcd filter=lfs diff=lfs merge=lfs -text
+cni-calico/files/cni/calico filter=lfs diff=lfs merge=lfs -text
+calico/files/startup filter=lfs diff=lfs merge=lfs -text
+calico/files/allocate-ipip-addr filter=lfs diff=lfs merge=lfs -text
+cni-bridge/files/cni/bridge filter=lfs diff=lfs merge=lfs -text
+cni-calico/files/cni/calico-ipam filter=lfs diff=lfs merge=lfs -text
+mesos-agent/files/dvdcli filter=lfs diff=lfs merge=lfs -text
+marathon/files/plugins/auth-plugin_2.11-1.0.jar filter=lfs diff=lfs merge=lfs -text
+marathon/files/plugins/plugins_2.11-0.1-SNAPSHOT.jar filter=lfs diff=lfs merge=lfs -text

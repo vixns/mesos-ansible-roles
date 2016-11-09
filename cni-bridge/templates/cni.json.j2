@@ -1,0 +1,17 @@
+{
+    "cniVersion": "0.2.0",
+    "name": "vlan",
+    "type": "bridge",
+    "bridge": "cni0",
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "subnet": "10.{{vlan_id}}.0.0/16",
+        "rangeStart": "10.{{vlan_id}}.{{cni_net_id}}.2",
+        "rangeEnd": "10.{{vlan_id}}.{{cni_net_id + 1}}.254",
+        "gateway": "10.{{vlan_id}}.0.{{cni_net_id}}",
+        "routes": [
+            { "dst": "0.0.0.0/0" }
+        ]
+    }
+}

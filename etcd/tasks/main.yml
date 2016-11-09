@@ -1,0 +1,36 @@
+---
+- name: install etcd
+  copy: src={{item}} dest=/usr/bin/{{item}} mode=0755
+  with_items:
+    - etcd
+    - etcdctl
+  tags:
+    - etcd
+
+- name: create etcd service directory
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/sv/etcd
+  tags:
+    - etcd
+
+- name: update etcd run file
+  template: src=run.sh.j2 dest=/etc/sv/etcd/run mode=0755
+  when: not etcd_tls
+  notify:
+    - restart etcd
+  tags:
+    - etcd
+
+- name: update etcd run file (tls enabled)
+  template: src=run-tls.sh.j2 dest=/etc/sv/etcd/run mode=0755
+  when: etcd_tls
+  notify:
+    - restart etcd
+  tags:
+    - etcd
+
+- name: configure etcd service
+  runit: name=etcd enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - etcd

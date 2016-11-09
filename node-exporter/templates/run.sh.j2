@@ -1,0 +1,8 @@
+#!/bin/bash
+exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec /opt/node_exporter/node_exporter \
+  -collector.netdev.ignored-devices="veth" \
+  -collectors.enabled="conntrack,diskstats,runit,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,time,uname,vmstat" \
+  -log.level=warn \
+  -web.listen-address={{internal_ip | default(ansible_eth1.ipv4.address)}}:9100

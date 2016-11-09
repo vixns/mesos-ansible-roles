@@ -1,0 +1,4 @@
+---
+etcd_tls: false
+etcd_tls_clients: false
+etcd_cluster_token: etcd-cluster-1

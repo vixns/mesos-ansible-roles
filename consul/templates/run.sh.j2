@@ -1,0 +1,4 @@
+#!/bin/bash
+exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec /usr/bin/consul agent -client "::" -advertise {{consul_ip  | default(ansible_eth0.ipv4.address) }} -config-dir /etc/consul.d -rejoin -log-level warn -syslog {{consul_options}}

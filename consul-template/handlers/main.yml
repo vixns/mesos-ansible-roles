@@ -1,0 +1,5 @@
+---
+- name: reload consul-template
+  command: sv reload consul-template
+- name: restart consul-template
+  command: sv restart consul-template

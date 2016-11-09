@@ -1,0 +1,119 @@
+---
+
+- name: install felix
+  unarchive: src=https://github.com/projectcalico/felix/releases/download/1.4.3/calico-felix-1.4.3-git-0586949.tgz
+    dest=/opt
+    copy=no
+    creates=/usr/bin/calico-felix
+  tags:
+    - calico
+
+- name: install bird
+  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.1.0/bird
+    dest=/usr/bin/bird
+    mode=0755
+    checksum=md5:1a838eac3f6b325dd85c6355bf6c9855
+  tags:
+    - calico
+
+- name: install bird6
+  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.1.0/bird6
+    dest=/usr/bin/bird6
+    mode=0755
+    checksum=md5:7aa58e1b0b8b74fd78bf1a251c240a1d
+  tags:
+    - calico
+
+- name: install birdcl
+  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.1.0/birdcl
+    dest=/usr/bin/birdcl
+    mode=0755
+    checksum=md5:e9fa2bdd19512a287481351f12d5608e
+  tags:
+    - calico
+
+- name: install calico-bgp-daemon
+  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.0/calico-bgp-daemon
+    dest=/usr/bin/calico-bgp-daemon
+    mode=0755    
+    checksum=md5:46a489b5fb6b9f17732837d2f9daa31f
+  tags:
+    - calico
+
+- name: install gobgp
+  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.0/gobgp
+    dest=/usr/bin/gobgp
+    mode=0755
+    checksum=md5:33e5da406ce794bf71762c8e1b05c067
+  tags:
+    - calico
+
+- name: install confd
+  get_url: url=https://github.com/projectcalico/confd/releases/download/v0.10.0-scale/confd.static
+    dest=/usr/bin/confd.static
+    mode=0755
+    checksum=md5:6d5a47c3e064e69047e0c05a0b1029e5
+  tags:
+    - calico
+
+- name: install calico-startup
+  copy: src=startup dest=/usr/bin/calico-startup mode=0755
+  tags:
+    - calico
+
+- name: install allocate-ipip-addr
+  copy: src=allocate-ipip-addr dest=/usr/bin/allocate-ipip-addr mode=0755
+  tags:
+    - calico
+
+- name: install calico dependencies
+  apt: name={{ item }}
+       state=latest
+       default_release=jessie-backports
+       install_recommends=no
+       update_cache=yes
+       cache_valid_time=3600
+  with_items:
+    - ipset
+    - conntrack
+  tags:
+    - calico
+
+- name: create calico directories
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/calico
+    - /etc/sv/felix
+    - /etc/sv/confd
+    - /etc/sv/bird
+    - /etc/sv/bird6
+    - /var/run/calico
+  tags:
+    - calico
+
+- name: install confd templates
+  copy: src=confd dest=/etc/calico/
+  tags:
+    - calico
+
+- name: update run files
+  template: src={{item}}.sh.j2 dest=/etc/sv/{{item}}/run mode=0755
+  with_items:
+    - felix
+    - confd
+    - bird
+    - bird6
+  notify:
+    - restart {{item}}
+  tags:
+    - calico
+
+- name: configure calico services
+  runit: name={{item}} enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  with_items:
+    - felix
+    - confd
+    - bird
+    - bird6
+  tags:
+    - calico

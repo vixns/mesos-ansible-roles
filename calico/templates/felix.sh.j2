@@ -1,0 +1,8 @@
+#!/bin/bash
+exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+export IP="{{internal_ip}}"
+export ETCD_AUTHORITY="{% for host in groups['masters'] %}http{% if etcd_tls_clients %}s{% endif %}://{{ hostvars[host].inventory_hostname }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
+export FELIX_ETCDENDPOINTS="$ETCD_AUTHORITY"
+export FELIX_FAILSAFEINBOUNDHOSTPORTS="22,2222"
+exec /opt/calico-felix/calico-felix

@@ -1,0 +1,129 @@
+---
+- name: configure hostname
+  hostname: name='{{ ansible_hostname }}'
+
+- name: "Ensure /etc/hosts has fqdn"
+  replace: dest=/etc/hosts regexp='{{item|regex_replace('^([^\.]+).*$', '\\1')}}.*{{item|regex_replace('^([^\.]+).*$', '\\1')}}' replace="{{item}} {{item|regex_replace('^([^\.]+).*$', '\\1')}}"
+  with_items: "{{ groups['all'] }}"
+
+- name: add mesosphere apt key
+  apt_key: keyserver=keyserver.ubuntu.com id=E56151BF
+- name: add mesosphere apt repo
+  apt_repository: state=present
+                  update_cache=yes
+                  repo='deb http://repos.mesosphere.io/debian jessie main'
+                  filename='mesosphere'
+
+- name: add vixns apt key
+  apt_key: url=http://apt.vixns.net/vixns.gpg state=present
+
+- name: add vixns apt repo
+  apt_repository: state=present
+                  update_cache=yes
+                  repo='deb http://apt.vixns.net jessie contrib non-free main'
+                  filename='vixns'
+
+- name: add jessie-backports apt repo
+  apt_repository: state=present
+                  update_cache=yes
+                  repo='deb http://http.debian.net/debian jessie-backports contrib non-free main'
+                  filename='backports'
+
+- name: install packages
+  apt: name={{ item }}
+       state=latest
+       default_release=jessie-backports
+       install_recommends=no
+       update_cache=yes
+       cache_valid_time=3600
+  with_items:
+    - linux-image-amd64
+    - intel-microcode
+    - firmware-linux
+    - firmware-netxen
+    - firmware-realtek
+    - openjdk-8-jdk
+    - unzip
+    - curl
+    - python-pip
+    - jq
+    - git
+    - lsof
+    - xfsprogs
+    - bind9-host
+    - golang
+    - bridge-utils
+    - irqbalance
+    - rsyslog
+    - sysvinit-core
+    - cgroupfs-mount
+    - hdparm
+
+- name: create volume groups
+  lvg: vg={{ item.vg }} pvs={{ item.pvs }}
+  with_items: "{{lvgs|default([])}}"
+  tags:
+    - disks
+
+- name: create logical volumes
+  lvol: vg={{ item.vg }} lv={{ item.lv }} size={{ item.size }}
+  with_items: "{{lvols|default([])}}"
+  tags:
+    - disks
+
+- name: create filesystems
+  filesystem: fstype={{item.fstype | default('ext4')}} dev={{item.device}} opts={{item.fsoptions | default('')}} resizefs=yes
+  with_items: "{{mount_points|default([])}}"
+  tags:
+    - disks
+
+- name: mount disks
+  mount: name={{ item.dest }}
+         src={{item.device}}
+         fstype={{item.fstype | default('ext4')}}
+         opts={{item.options | default('defaults')}}
+         dump={{item.dump | default(1)}}
+         passno={{item.passno | default(2)}}
+         state=mounted
+  with_items: "{{mount_points|default([])}}"
+  tags:
+    - disks
+
+- name: load kernel modules
+  modprobe: name=nf_conntrack_ipv4 state=present
+  ignore_errors: True
+
+- name: sysctl tuning
+  sysctl: name={{item.key}} value={{item.val}} state=present
+  with_items:
+    - { key: vm.swappiness, val: 1 }
+    - { key: net.core.somaxconn, val: 10000 }
+    - { key: net.ipv4.tcp_tw_reuse, val: 1 }
+    - { key: net.netfilter.nf_conntrack_max, val: 1000000 }
+    - { key: net.netfilter.nf_conntrack_generic_timeout, val: 120 }
+    - { key: net.netfilter.nf_conntrack_tcp_timeout_time_wait, val: 30 }
+    - { key: net.netfilter.nf_conntrack_tcp_timeout_fin_wait, val: 30 }
+    - { key: net.netfilter.nf_conntrack_tcp_timeout_established, val: 900 }
+    - { key: net.ipv4.ip_local_port_range, val: "1024 65023" }
+    - { key: net.ipv4.tcp_max_syn_backlog, val: 10240 }
+    - { key: net.ipv4.tcp_max_tw_buckets, val: 400000 }
+    - { key: net.ipv4.tcp_max_orphans, val: 60000 }
+    - { key: net.ipv4.tcp_synack_retries, val: 3 }
+    - { key: net.ipv4.ip_forward, val: 1 }
+    - { key: net.ipv4.ip_nonlocal_bind, val: 1 }
+    - { key: net.ipv4.tcp_fin_timeout, val: 15 }
+    - { key: net.ipv4.tcp_keepalive_intvl, val: 30 }
+    - { key: net.ipv4.tcp_keepalive_probes, val: 5 }
+    - { key: net.ipv4.neigh.default.gc_thresh1, val: 2048 }
+    - { key: net.ipv4.neigh.default.gc_thresh2, val: 4096 }
+    - { key: net.ipv4.neigh.default.gc_thresh3, val: 8192 }
+    - { key: net.ipv4.neigh.default.gc_interval, val: 60 }
+    - { key: net.ipv4.neigh.default.gc_stale_time, val: 120 }
+    - { key: vm.overcommit_memory, val: 1 }
+    - { key: vm.max_map_count, val: 262144 }
+
+- name: "Build hosts file"
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item].internal_ip | default(hostvars[item].ansible_default_ipv4.address) }}.*$' line="{{ hostvars[item].internal_ip | default(hostvars[item].ansible_default_ipv4.address) }} {{hostvars[item].internal_fqdn | default(item)}} {{hostvars[item].ansible_hostname}}" state=present
+  when: hostvars[item].ansible_default_ipv4.address is defined
+  with_items: "{{groups['all']}}"
+

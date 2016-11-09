@@ -1,0 +1,99 @@
+---
+- name: download mesos sources
+  git: repo=https://git-wip-us.apache.org/repos/asf/mesos.git dest='/usr/src/mesos-{{mesos_version}}' version='origin/{{mesos_version}}'
+#  unarchive: src='http://www.apache.org/dist/mesos/{{mesos_version}}/mesos-{{mesos_version}}.tar.gz' dest=/usr/src copy=no creates='/usr/src/mesos-{{mesos_version}}'
+  tags:
+    - mesos
+
+- name: create mesos directories
+  file: state=directory path={{item}}
+  with_items:
+    - '/usr/src/mesos-{{mesos_version}}/build'
+    - /etc/mesos
+  tags:
+    - mesos
+
+- name: install packages
+  apt: name={{ item }} state=latest default_release=jessie-backports install_recommends=no update_cache=yes cache_valid_time=3600
+  with_items:
+    - build-essential
+    - python-dev
+    - libcurl4-openssl-dev
+    - libsasl2-dev
+    - libsasl2-modules
+    - maven
+    - libapr1-dev
+    - libsvn-dev
+    - libssl-dev
+    - libevent-dev
+    - libz-dev
+    - libnl-3-dev
+    - libnl-route-3-dev
+    - libnl-idiag-3-dev
+    - xfslibs-dev
+    - libblkid-dev
+    - libelf-dev
+    - autoconf
+    - automake
+    - libtool
+
+  tags:
+    - mesos
+
+- name: bootstrap mesos build
+  command: ./bootstrap
+  args:
+    chdir: '/usr/src/mesos-{{mesos_version}}'
+    creates: '/usr/src/mesos-{{mesos_version}}/configure'
+  tags:
+    - mesos
+
+- name: configure mesos build
+  command: ../configure --enable-ssl --enable-libevent --prefix=/usr --enable-optimize --enable-silent-rules --enable-xfs-disk-isolator
+  args:
+    chdir: '/usr/src/mesos-{{mesos_version}}/build'
+    creates: '/usr/src/mesos-{{mesos_version}}/build/Makefile'
+  tags:
+    - mesos
+
+- name: build and install mesos
+  command: 'make -j {{ansible_processor_cores}} -l {{ansible_processor_cores - 1}} V=0 install'
+  args:
+    chdir: '/usr/src/mesos-{{mesos_version}}/build'
+    creates: '/usr/lib/libmesos-{{mesos_version}}.so'
+  tags:
+    - mesos
+
+#- name: update lib deps
+#  command: ldconfig
+#  tags:
+#    - mesos
+
+- name: install python-mesos
+  easy_install: name='/usr/src/mesos-{{mesos_version}}/build/src/python/dist/{{ item }}-{{mesos_version}}-*.egg' state=present
+  with_items:
+    - mesos.interface
+    - mesos.native
+    - mesos
+    - mesos.cli
+  tags:
+    - mesos
+
+- name: install mesos-init-wrapper artifact
+  copy: src=mesos-init-wrapper.sh dest=/usr/bin/mesos-init-wrapper mode=0755
+  tags:
+    - mesos
+
+- name: set mesos defaults
+  template: src=defaults.j2 dest=/etc/default/mesos mode=0644
+  tags:
+    - mesos
+
+- name: set mesos credentials
+  template: src={{item}}.json.j2 dest=/etc/mesos/{{item}} mode=0600
+  with_items:
+    - credentials
+    - credential-agent
+  tags:
+    - mesos
+

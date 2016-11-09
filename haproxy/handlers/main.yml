@@ -1,0 +1,4 @@
+- name: restart haproxy
+  command: sv restart haproxy
+- name: reload haproxy
+  command: sv reload haproxy

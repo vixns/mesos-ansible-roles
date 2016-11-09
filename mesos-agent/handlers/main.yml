@@ -1,0 +1,8 @@
+- name: restart mesos-agent
+  command: sv restart mesos-agent
+
+- name: restart mesos-exporter
+  command: sv restart mesos-exporter
+
+- name: set cni0 up
+  command: /sbin/ifup --force cni0

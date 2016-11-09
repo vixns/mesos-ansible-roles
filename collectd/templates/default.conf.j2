@@ -1,0 +1,32 @@
+Hostname "{{ansible_hostname}}"
+Interval 5
+FQDNLookup false
+Timeout 3
+ReadThreads 5
+<LoadPlugin "python">
+Globals true
+</LoadPlugin>
+LoadPlugin conntrack
+LoadPlugin irq
+LoadPlugin cpu
+LoadPlugin swap
+LoadPlugin interface
+<Plugin interface>
+Interface "eth0"
+Interface "eth1"
+Interface "br0"
+</Plugin>
+LoadPlugin disk
+<Plugin disk>
+Disk "/(m|s)d[0-9]/"
+</Plugin>
+LoadPlugin df
+<Plugin df>
+Device "/^/dev/md/"
+Device "/^/dev/mapper/vg/"
+ValuesAbsolute true
+ReportByDevice true
+ValuesPercentage true
+</Plugin>
+LoadPlugin md
+LoadPlugin load

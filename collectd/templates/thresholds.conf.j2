@@ -1,0 +1,30 @@
+LoadPlugin threshold
+<Plugin threshold>
+    <Plugin df>
+        <Type "percent_bytes">
+            Instance free
+            WarningMin 15
+            FailureMin 5
+            Interesting false
+        </Type>
+    </Plugin>
+    <Host "{{ansible_hostname}}">
+        <Type "cpu">
+            Instance "idle"
+            Hits 20
+            FailureMin 10
+        </Type>
+        <Plugin "memory">
+            <Type "memory">
+                Instance "cached"
+                WarningMin 100000000
+            </Type>
+        </Plugin>
+        <Type "load">
+            DataSource "midterm"
+            FailureMax 6
+            Hits 3
+            Hysteresis 3
+        </Type>
+    </Host>
+</Plugin>

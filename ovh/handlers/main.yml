@@ -1,0 +1,6 @@
+- name: update grub
+  command: /usr/sbin/update-grub
+
+- name: update eth1
+  command: /sbin/ifup --force eth1
+  

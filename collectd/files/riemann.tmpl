@@ -1,0 +1,9 @@
+LoadPlugin write_riemann
+<Plugin "write_riemann">
+ <Node "{{env "HOSTNAME"}}">
+   {{range $i, $element := service "riemann"}}{{if not $i}}Host "{{.Address}}"
+   Port "{{.Port}}"{{end}}{{end}}
+   Protocol TCP
+ </Node>
+ Tag "collectd"
+</Plugin>

@@ -1,0 +1,28 @@
+---
+
+- name: centos - check if already installed
+  shell: which runit
+  ignore_errors: yes
+  register: runit_installed
+
+- name: centos - Add runit to yum
+  shell: "curl -s https://packagecloud.io/install/repositories/imeyer/runit/script.rpm.sh | sudo bash"
+  when: runit_installed|failed
+
+- name: centos - install package runit
+  yum:
+    name=runit
+    state=present
+    update_cache=yes
+
+- name: centos - start and enable runit service
+  service:
+    name=runsvdir-start
+    enabled=yes
+    state=started
+  when: ansible_distribution_major_version == "7"
+
+- name: dependencies
+  yum:
+    name=libselinux-python
+    state=present

@@ -1,0 +1,22 @@
+---
+- name: install openssh-server
+  apt: name=openssh-server state=latest default_release=jessie-backports install_recommends=no
+
+- name: create ssh service dir
+  file: state=directory path=/etc/sv/ssh
+
+- name: disable ssh password
+  lineinfile: dest=/etc/ssh/sshd_config regexp=^PasswordAuthentication line='PasswordAuthentication no'
+  notify:
+    - restart ssh
+
+- name: update ssh run file
+  copy: src=run.sh dest=/etc/sv/ssh/run mode=0755
+  notify:
+    - restart ssh
+
+- name: configure ssh service
+  runit: name=ssh enabled=true state=up timeout=9 user='root' auto=no has_log=no
+
+- name: disable sysv ssh service
+  service: name=ssh state=stopped enabled=no

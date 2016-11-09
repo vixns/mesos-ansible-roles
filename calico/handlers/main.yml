@@ -1,0 +1,15 @@
+---
+
+- name: restart felix
+  command: sv restart felix
+
+- name: restart confd
+  command: sv restart confd
+
+
+- name: restart bird
+  command: sv restart bird
+
+
+- name: restart bird6
+  command: sv restart bird6

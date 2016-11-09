@@ -1,0 +1,81 @@
+; -*- mode: clojure; -*-
+; vim: filetype=clojure:ts=2:sw=2
+
+(def zookeeper-uri "{{range $i, $element := service "zookeeper"}}{{if $i}},{{end}}{{.Address}}:{{.Port}}{{end}}")
+(def kafka-brokers "{{range $i, $element := service "kafka"}}{{if $i}},{{end}}{{.Address}}:{{.Port}}{{end}}")
+
+(defn- nil-dash [m] (into {} (filter (comp not #{"-"} val) m)))
+(defn- priority2state [p] (case p "err" "critical" "emerg" "critical" "notice" "info" "info" "info" "warn" "warning" default nil))
+(defn- httpcode2state [c] (if (> c 499) "critical" (if (> c 399) "warning" (if (> c 299) "info" "ok"))))
+
+(defn- parse-syslog [v]
+    (dissoc 
+      (assoc v 
+         :state (priority2state (:priority v))
+         :service (:ident v)
+         :description (:message v)
+         :tags [ "syslog" ]
+        )
+      :message :ident))
+
+(defn- parse-docker [v]
+  (dissoc 
+    (assoc v 
+       :host (last (clojure.string/split (:tag v) #"\." 2))
+       :state (if (= (:stream v) "stderr") "critical" "info") 
+       :service (:ident v)
+       :description (:log v)
+       :tags [ "docker" ]
+      )
+    :log :stream :tag :ident))
+
+(defn- parse-nginx [v]
+  (nil-dash 
+    (dissoc 
+      (assoc v 
+         :state (httpcode2state (Integer/parseInt (:statuscode v)))
+         :service (:method v)
+         :description (:path v)
+         :metric (read-string (:resptime v))
+         :tags [ "nginx" ]
+        )
+      :tag :ident :method :path)))
+
+(defn- logs-decode [b fn]
+  (try
+    (let [j (apply str (map #(char (bit-and % 255)) b))
+      parsed (cheshire.core/parse-string j true)
+      t (or (:time parsed) (clj-time.coerce/to-long (clj-time.core/now)))
+      m (assoc parsed :time t)
+      e (fn m)]
+      (event e))
+      (catch Exception e (event {:time (clj-time.coerce/to-long (clj-time.core/now)) :state "critical" :description (str (.getMessage e))}))))
+
+(defn- syslog-logs-decode [b] (logs-decode b parse-syslog))
+(defn- docker-logs-decode [b] (logs-decode b parse-docker))
+(defn- nginx-logs-decode [b] (logs-decode b parse-nginx))
+
+(kafka/kafka-consumer {
+ :topic "syslog-logs"
+ :zookeeper.connect zookeeper-uri
+ :group.id "riemann.group"
+ :auto.offset.reset "smallest"
+ :auto.commit.enable "true"}
+ syslog-logs-decode)
+
+(kafka/kafka-consumer {
+ :topic "nginx-logs"
+ :zookeeper.connect zookeeper-uri
+ :group.id "riemann.group"
+ :auto.offset.reset "smallest"
+ :auto.commit.enable "true"}
+ nginx-logs-decode)
+
+(kafka/kafka-consumer {
+ :topic "docker-logs"
+ :zookeeper.connect zookeeper-uri
+ :group.id "riemann.group"
+ :auto.offset.reset "smallest"
+ :auto.commit.enable "true"}
+ docker-logs-decode)
+

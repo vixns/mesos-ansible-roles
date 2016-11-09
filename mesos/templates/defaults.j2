@@ -1,0 +1,2 @@
+IP={{ internal_ip  | default(ansible_eth0.ipv4.address) }}
+ULIMIT="-n 65535"

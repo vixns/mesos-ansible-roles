@@ -1,0 +1,3 @@
+- name: restart exhibitor
+  command: sv restart exhibitor
+  

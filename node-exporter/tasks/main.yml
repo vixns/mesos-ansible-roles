@@ -1,0 +1,30 @@
+---
+
+- name: download prometheus node exporter
+  shell: "curl -L -s https://github.com/prometheus/node_exporter/releases/download/0.12.0/node_exporter-0.12.0.linux-amd64.tar.gz | tar zxf - && ln -s node_exporter-0.12.0.linux-amd64 node_exporter"
+  args:
+    chdir: /opt/
+    creates: /opt/node_exporter/node_exporter
+  notify:
+    - restart node-exporter
+  tags:
+    - prom
+
+- name: create node-exporter directories
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/sv/node-exporter
+  tags:
+    - prom
+
+- name: update node-exporter run file
+  template: src=run.sh.j2 dest=/etc/sv/node-exporter/run mode=0755
+  notify:
+    - restart node-exporter
+  tags:
+    - prom
+
+- name: configure node-exporter service
+  runit: name=node-exporter enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - prom

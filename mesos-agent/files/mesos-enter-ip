@@ -1,0 +1,25 @@
+#!/bin/sh
+
+usage () {
+    echo "$0 ip [command]"
+    exit 1
+}
+
+nopid () {
+    echo "cannot find pid for ip ${NSIP}"
+    exit 1
+}
+
+[ -n "$1" ] || usage
+NSIP=$1
+
+NSCMD="sh"
+[ -z "$2" ] || NSCMD=$2
+
+. /etc/default/mesos
+
+NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[]? | select(.name == \"vlan\") and .ip_addresses[0].ip_address == \"${1}\") |  .status .executor_pid")
+
+[ -n "$NSPID" ] || nopid
+
+exec nsenter -t $NSPID -m -n -p -i -u $NSCMD

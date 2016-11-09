@@ -1,0 +1,67 @@
+---
+
+- name: install packages
+  apt: name={{ item }}
+       state=latest
+       default_release=jessie-backports
+       install_recommends=no
+       update_cache=yes
+       cache_valid_time=3600
+  with_items:
+    - nfs-common
+
+- name: block external portmap access
+  iptables: chain=INPUT in_interface=eth0 protocol={{item}} destination_port=111 jump=DROP
+  with_items: 
+    - tcp
+    - udp
+
+- name: limit portmap access
+  lineinfile: dest={{item.dest}} regexp='rpcbind' line={{item.line}}
+  with_items: 
+    - {dest: /etc/hosts.deny, line: 'rpcbind: ALL'}
+    - {dest: /etc/hosts.allow, line: 'rpcbind: 127.0.0.1 10.0.0.0/8'}
+
+
+- name: configure grub cgroups
+  lineinfile: dest=/etc/default/grub
+              regexp=^GRUB_CMDLINE_LINUX=
+              line='GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1 transparent_hugepage=never"'
+  notify:
+    - update grub
+
+- name: configure grub default
+  lineinfile: dest=/etc/default/grub regexp='^GRUB_DEFAULT=' line='GRUB_DEFAULT=1'
+  notify:
+    - update grub
+
+- name: enable interfaces.d directory
+  lineinfile: dest=/etc/network/interfaces regexp='^source-directory' line='source-directory interfaces.d'
+  tags:
+    - eth1
+
+- name: install interface 
+  template: src=eth1.j2 dest=/etc/network/interfaces.d/eth1 mode=644
+  register: update_eth1
+  tags:
+    - eth1
+
+- name: enable eth1
+  command: /sbin/ifup --force eth1
+  when: update_eth1.changed
+  tags:
+    - eth1
+
+- name: install acme script
+  template: src=register-acme-cert.sh.j2 dest=/usr/bin/register-acme-cert mode=0755
+
+
+- name: limit zookeeper access
+  iptables: chain=INPUT in_interface=eth0 protocol=tcp destination_port=2181 jump=DROP
+
+- name: limit exhibitor web UI access
+  iptables: chain=INPUT in_interface=eth0 protocol=tcp destination_port=8181 jump=DROP
+
+- name: limit zookeeper JMX access
+  iptables: chain=INPUT in_interface=eth0 protocol=tcp destination_port=9999 jump=DROP
+

@@ -1,0 +1,7 @@
+server:
+  domain-insecure: "{{consul_domain}}."
+  do-not-query-localhost: no
+forward-zone:
+  name: "{{consul_domain}}."
+  forward-addr: {{ internal_ip | default(ansible_eth0.ipv4.address) }}@8600
+ 

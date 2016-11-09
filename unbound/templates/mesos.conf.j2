@@ -1,0 +1,14 @@
+server:
+  domain-insecure: "{{mesos_domain}}."
+  do-not-query-localhost: no
+forward-zone:
+  name: "{{mesos_domain}}."
+  {% for host in groups['masters'] %}
+{% if host == inventory_hostname %}
+forward-addr: {{internal_ip | default(ansible_eth0.ipv4.address)}}@5353
+{% else %}
+forward-addr: {{ hostvars[host].internal_ip | default(hostvars[host].external_ip) }}@5353
+{% endif %}
+  {% endfor %}
+
+ 

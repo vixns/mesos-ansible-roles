@@ -1,0 +1,2 @@
+- name: restart unbound
+  command: sv restart unbound

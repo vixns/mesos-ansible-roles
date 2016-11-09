@@ -1,0 +1,5 @@
+auto cni0
+iface cni0 inet static
+  address 10.{{vlan_id}}.0.{{cni_net_id}}
+  netmask 255.255.0.0
+  bridge_ports eth1.{{vlan_id}}

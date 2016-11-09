@@ -1,0 +1,17 @@
+---
+- name: install smartmontools
+  apt: name=smartmontools state=latest default_release=jessie-backports install_recommends=no
+
+- name: create smartd service dir
+  file: state=directory path=/etc/sv/smartd
+
+- name: update smartd run file
+  copy: src=run.sh dest=/etc/sv/smartd/run mode=0755
+  notify:
+    - restart smartd
+
+- name: configure smartd service
+  runit: name=smartd enabled=true state=up timeout=9 user='root' auto=no has_log=no
+
+- name: disable sysv smartd service
+  service: name=smartd state=stopped enabled=no

@@ -1,0 +1,13 @@
+#!/bin/sh
+exec 2>&1
+ulimit -n 1048576
+ulimit -c unlimited
+ulimit -l unlimited
+{% if mesos_tls %}
+export LIBPROCESS_SSL_ENABLED=true
+export LIBPROCESS_SSL_SUPPORT_DOWNGRADE={%if mesos_tls_mixed %}true{% else %}false{% endif %}
+
+export LIBPROCESS_SSL_KEY_FILE={{mesos_key_file}}
+export LIBPROCESS_SSL_CERT_FILE={{mesos_cert_file}}
+{% endif %}
+exec /usr/bin/mesos-init-wrapper master

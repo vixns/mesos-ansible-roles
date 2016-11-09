@@ -1,0 +1,14 @@
+#!/bin/sh
+
+usage () {
+    echo "$0 pid [command]"
+    exit 1
+}
+
+[ -n "$1" ] || usage
+NSPID=$1
+
+NSCMD="sh"
+[ -z "$2" ] || NSCMD=$2
+
+exec nsenter -t $NSPID -m -n -p -i -u $NSCMD

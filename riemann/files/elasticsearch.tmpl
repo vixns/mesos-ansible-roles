@@ -1,0 +1,18 @@
+; -*- mode: clojure; -*-
+; vim: filetype=clojure:ts=2:sw=2
+
+(require '[riemann.elastic :as elastic])
+
+(logging/set-level "riemann.elastic" ch.qos.logback.classic.Level/WARN) 
+
+(def elastic-url "{{range $i, $element := service "logs-elasticsearch"}}{{if not $i}}http://{{.Address}}:{{.Port}}{{end}}{{end}}")
+(def elastic-conn (when (seq elastic-url) (elastic/es-connection elastic-url)))
+
+(elastic/load-index-template elastic-conn "default" "/etc/riemann/config/default-mapping.json")
+
+(defn es-sink [type & {:keys [index] :or {index "logstash"}}] 
+    (async-queue! (keyword type)
+                {:queue-size     1e4  ; 10,000 events max
+                     :core-pool-size 4    ; Minimum 4 threads
+                     :max-pools-size 100} ; Maxium 100 threads
+                (elastic/es-index elastic-conn type :index index)))

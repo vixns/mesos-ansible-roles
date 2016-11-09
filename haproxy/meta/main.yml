@@ -1,0 +1,4 @@
+---
+dependencies:
+  - { role: gotansible.runit }
+  - { role: consul-template }

@@ -1,0 +1,35 @@
+[
+  {
+    "name": "cpus",
+    "type": "SCALAR",
+    "scalar": {
+      "value": {{mesos_cpus}}
+    }
+  },
+  {
+    "name": "mem",
+    "type": "SCALAR",
+    "scalar": {
+      "value": {{mesos_mem}}
+    }
+  },
+  {
+    "name": "disk",
+    "type": "SCALAR",
+    "scalar": {
+      "value": {{mesos_disk}}
+    }
+  },
+  {
+    "name": "ports",
+    "type": "RANGES",
+    "ranges": {
+      "range": [
+        {
+          "begin": 30000,
+          "end": 34000
+        }
+      ]
+    }
+  }{{mesos_extra_resources}}
+]

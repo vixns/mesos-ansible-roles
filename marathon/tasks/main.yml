@@ -1,0 +1,106 @@
+---
+- name: install marathon
+  copy: src={{item}} dest=/usr/bin/{{item}} mode=0755
+  with_items:
+    - marathon
+    - marathonctl
+  tags:
+    - marathon
+
+- name: create marathon service dir
+  file: state=directory path={{item}}
+  with_items:
+    - /etc/sv/marathon
+    - /etc/marathon
+    - /etc/marathon/conf
+    - /var/lib/marathon
+  tags:
+    - marathon
+
+- name: copy marathon config files
+  copy: src=conf/{{item}} dest=/etc/marathon/conf/{{item}} mode=0600
+  with_items:
+    - '?disable_http'
+    - '?leader_proxy_ssl_ignore_hostname'
+    - '?mesos_authentication'
+    - enable_features
+    - max_tasks_per_offer
+    - mesos_authentication_principal
+    - mesos_authentication_secret_file
+    - mesos_role
+    - plugin_conf
+    - plugin_dir
+    - logging_level
+    - zk_timeout
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: update marathon config files
+  template: src={{item}}.j2 dest=/etc/marathon/conf/{{item}} mode=0600
+  with_items:
+    - hostname
+    - http_realm
+    - master
+    - zk
+    - ssl_keystore_path
+    - ssl_keystore_password    
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: update marathonctl config file
+  template: src=marathonctl.j2 dest=/etc/marathonctl mode=0600
+  tags:
+    - marathon
+
+- name: copy marathon private files
+  copy: src={{item}} dest=/etc/marathon/{{item}} mode=0600
+  with_items:
+    - log4j.properties
+    - application.conf
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: update marathon private files
+  template: src={{item}}.j2 dest=/etc/marathon/{{item}} mode=0600
+  with_items:
+    - secret
+    - plugin.conf
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: update marathon plugins
+  copy: src=plugins dest=/var/lib/marathon mode=0600 directory_mode=0700
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: register marathon on consul
+  consul:
+    host: '{{external_ip | default(internal_ip)}}'
+    service_name: marathon
+    service_port: 8443
+    service_address: '{{external_ip | default(internal_ip)}}'
+  when: consul_domain is defined
+  tags:
+    - marathon
+
+- name: update marathon run file
+  copy: src=run.sh dest=/etc/sv/marathon/run mode=0755
+  notify:
+    - restart marathon
+  tags:
+    - marathon
+
+- name: configure marathon service
+  runit: name=marathon enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - marathon

@@ -1,0 +1,1 @@
+namespaces/pid,cgroups/cpu,cgroups/mem,filesystem/linux,docker/runtime,network/cni,docker/volume

@@ -1,0 +1,3 @@
+- name: restart ntp
+  command: sv restart ntp
+  

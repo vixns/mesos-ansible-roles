@@ -1,0 +1,53 @@
+---
+- name: create collectd config dir
+  file: state=directory path=/etc/collectd/collectd.conf.d
+
+- name: create collectd template dir
+  file: state=directory path=/etc/consul-template/templates.d/collectd
+
+- name: create collectd log dir
+  file: state=directory path=/var/log/collectd
+
+- name: copy collectd top config files
+  copy: src=collectd.conf dest=/etc/collectd/collectd.conf
+  notify:
+      - restart collectd
+
+- name: copy collectd default config files
+  template: src=default.conf.j2 dest=/etc/collectd/collectd.conf.d/00-default.conf
+  notify:
+      - restart collectd
+
+- name: copy collectd thresholds files
+  template: src=thresholds.conf.j2 dest=/etc/collectd/collectd.conf.d/thresholds.conf
+  notify:
+      - restart collectd
+
+- name: copy collectd riemann template
+  copy: src=riemann.tmpl dest=/etc/consul-template/templates.d/collectd/riemann.tmpl
+  notify:
+      - reload consul-template
+
+- name: copy consul-template collectd config
+  copy: src=collectd.hcl dest=/etc/consul-template/conf.d/collectd.hcl
+  notify:
+      - reload consul-template
+
+- name: install collectd package
+  apt: name=collectd state=present
+  notify:
+      - restart collectd
+
+- name: install libprotobuf package
+  apt: name=libprotobuf-c1 state=present
+  notify:
+      - restart collectd
+
+- name: collectd run file
+  copy: src=run.sh dest=/etc/sv/collectd/run mode=0755
+  notify:
+      - restart collectd
+
+- name: add collectd runit service
+  runit: name=collectd enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  

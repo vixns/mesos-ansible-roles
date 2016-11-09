@@ -1,0 +1,27 @@
+---
+- name: install openntpd
+  apt: name=openntpd state=latest default_release=jessie-backports install_recommends=no
+  tags:
+    - ntp
+
+- name: disable sysv ntp service
+  service: name=openntpd state=stopped enabled=no
+  tags:
+    - ntp
+
+- name: create ntp service dir
+  file: state=directory path=/etc/sv/ntp
+  tags:
+    - ntp
+
+- name: update ntp run file
+  copy: src=run.sh dest=/etc/sv/ntp/run mode=0755
+  notify:
+    - restart ntp
+  tags:
+    - ntp
+
+- name: configure ntp service
+  runit: name=ntp enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - ntp

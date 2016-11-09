@@ -1,0 +1,16 @@
+zookeeper-install-directory=/opt/zookeeper
+zookeeper-data-directory=/data/zookeeper/data
+zookeeper-log-directory=/data/zookeeper/logs
+log-index-directory=/data/zookeeper/logs
+cleanup-period-ms=300000
+check-ms=30000
+backup-period-ms=600000
+client-port=2181
+cleanup-max-files=20
+backup-max-store-ms=21600000
+connect-port=2888
+observer-threshold=0
+election-port=3888
+auto-manage-instances=0
+zoo-cfg-extra=tickTime=2000&initLimit=10&syncLimit=5&maxClientCnxns=250
+backup-extra=throttle=&bucket-name={{s3_bucket}}&key-prefix={{s3_prefix}}&max-retries=4&retry-sleep-ms=30000

@@ -1,0 +1,7 @@
+#!/bin/bash
+exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+sv start consul || exit 1
+export HOSTNAME=$(hostname -s)
+export MESOS_IP={{external_ip | default(internal_ip)}}
+exec /usr/bin/consul-template -consul={{internal_ip  | default(ansible_eth0.ipv4.address)}}:8500 -config="/etc/consul-template/conf.d"

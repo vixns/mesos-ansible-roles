@@ -1,0 +1,61 @@
+---
+- name: install unbound
+  apt: name=unbound state=latest default_release=jessie-backports install_recommends=no
+  tags:
+    - unbound
+
+- name: uninstall bind9
+  apt: name=bind9 state=removed
+  tags:
+    - unbound
+
+- name: disable sysv unbound service
+  service: name=unbound state=stopped enabled=no
+  tags:
+    - unbound
+
+- name: create unbound service dir
+  file: state=directory path=/etc/sv/unbound
+  tags:
+    - unbound
+
+- name: update unbound nodaemon file
+  copy: src=nodaemon.conf dest=/etc/unbound/unbound.conf.d/nodaemon.conf mode=0640
+  notify:
+    - restart unbound
+  tags:
+    - unbound
+
+- name: update unbound config files
+  template: src={{item}}.j2 dest=/etc/unbound/unbound.conf.d/{{item}} mode=0640
+  with_items:
+    - bind.conf
+    - mesos.conf
+  notify:
+    - restart unbound
+  tags:
+    - unbound
+
+- name: update unbound run file
+  copy: src=run.sh dest=/etc/sv/unbound/run mode=0755
+  notify:
+    - restart unbound
+  tags:
+    - unbound
+
+- name: configure unbound service
+  runit: name=unbound enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - unbound
+
+- name: update resolv.conf
+  template: src=resolv.conf.j2 dest=/etc/resolv.conf mode=644
+  tags:
+    - unbound
+
+- name: prevent resolv.conf changes from dhcp client
+  copy: src=dhcp-freeze dest=/etc/dhcp/dhclient-enter-hooks.d/freeze
+  tags:
+    - unbound
+
+  

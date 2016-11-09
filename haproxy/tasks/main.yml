@@ -1,0 +1,37 @@
+---
+- name: install haproxy
+  apt: name=haproxy state=latest default_release=jessie-backports install_recommends=no update_cache=yes cache_valid_time=3600
+
+- name: create haproxy service dir
+  file: state=directory path=/etc/sv/haproxy
+
+- name: update haproxy run file
+  copy: src=run.sh dest=/etc/sv/haproxy/run mode=0755
+  notify:
+    - restart haproxy
+  tags:
+    - haproxy
+
+- name: update consul template 
+  template: src=consul-template.tmpl.j2 dest=/etc/consul-template/templates.d/haproxy.tmpl mode=0644
+  notify:
+    - reload consul-template
+  tags:
+    - haproxy
+    
+- name: update consul-template config 
+  copy: src=consul-template.hcl dest=/etc/consul-template/conf.d/haproxy.hcl mode=0644
+  notify:
+    - reload consul-template
+  tags:
+    - haproxy
+
+- name: configure haproxy service
+  runit: name=haproxy enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - haproxy
+
+- name: disable sysv haproxy service
+  service: name=haproxy state=stopped enabled=no
+  tags:
+    - haproxy

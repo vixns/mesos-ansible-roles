@@ -1,0 +1,39 @@
+global
+    chroot /var/lib/haproxy
+    daemon
+
+defaults
+    mode    tcp
+    backlog 4096
+    maxconn 50000
+    option forceclose
+    option forwardfor
+    option dontlognull
+    option redispatch
+    timeout connect 2000
+    timeout client  50000
+    timeout server  50000
+
+frontend http-in
+    bind {{ ansible_eth0.ipv4.address }}:80
+    bind {{ ansible_eth0.ipv6[0].address }}:80
+    default_backend http-backend
+
+frontend https-in
+    bind {{ ansible_eth0.ipv4.address }}:443
+    bind {{ ansible_eth0.ipv6[0].address }}:443
+    default_backend https-backend
+
+backend http-backend
+    balance roundrobin{{ '{{' }}range $i, $element := service "proxy-internal"{{ '}}' }}
+    server {{ '{{' }}.ID{{ '}}' }} {{ '{{' }}.Address{{ '}}' }}:80 send-proxy-v2 check{{ '{{' }}end{{ '}}' }}
+
+backend https-backend
+    acl clienthello req_ssl_hello_type 1
+    acl serverhello rep_ssl_hello_type 2
+    tcp-request inspect-delay 5s
+    tcp-request content accept if clienthello
+    tcp-response content accept if serverhello
+
+    balance roundrobin{{ '{{' }}range $i, $element := service "proxy-internal"{{ '}}' }}
+    server {{ '{{' }}.ID{{ '}}' }} {{ '{{' }}.Address{{ '}}' }}:443 send-proxy-v2-ssl check{{ '{{' }}end{{ '}}' }}

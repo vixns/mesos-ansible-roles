@@ -1,0 +1,24 @@
+---
+
+- name: set cni vlan config file
+  template: src=cni.json.j2 dest=/etc/cni/net.d/10-vlan.conf mode=0644
+  tags:
+    - cni
+
+- name: install cni plugins
+  copy: src=cni/{{item}} dest=/opt/cni/bin/{{item}} mode=0755
+  with_items:
+    - calico
+    - calico-ipam
+  tags:
+    - cni
+
+- name: install calicoctl binary
+  get_url: url=http://www.projectcalico.org/builds/calicoctl checksum=md5:da43a15564e121159485e05fed40a433 dest=/usr/bin/calicoctl.bin mode=0755
+  tags:
+    - cni
+
+- name: install calicoctl wrapper
+  template: src=calicoctl.j2 dest=/usr/bin/calicoctl mode=0755
+  tags:
+    - cni

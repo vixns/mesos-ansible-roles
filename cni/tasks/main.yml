@@ -1,0 +1,22 @@
+---
+
+- name: create cni dirs
+  file: state=directory path={{ item }}
+  with_items:
+    - /etc/cni/net.d
+    - /opt/cni/bin
+  tags:
+    - cni
+
+- name: install cni plugins
+  copy: src=cni/{{item}} dest=/opt/cni/bin/{{item}} mode=0755
+  with_items:
+    - host-local
+    - loopback
+  tags:
+    - cni
+
+- name: set cni loopback config file 
+  copy: src=cni-loopback.conf dest=/etc/cni/net.d/99-loopback.conf mode=0644
+  tags:
+    - cni

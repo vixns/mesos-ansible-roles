@@ -1,0 +1,2 @@
+- name: restart marathon
+  command: sv restart marathon

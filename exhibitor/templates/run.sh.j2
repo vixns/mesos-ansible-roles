@@ -1,0 +1,13 @@
+#!/bin/bash
+exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
+export JMXPORT=9999
+exec java -jar /opt/exhibitor/exhibitor.jar \
+  --port 8181 \
+  --defaultconfig /opt/exhibitor/defaults.conf \
+  --configtype s3 \
+  --s3config {{ s3_bucket }}:{{ s3_prefix }}\
+  --s3region {{ aws_region }} \
+  --s3backup true \
+  --s3credentials /opt/exhibitor/credentials.properties \
+  --hostname {{ external_ip | default(internal_ip)  }}
