@@ -1,5 +1,8 @@
 ---
 - name: reload node-exporter
   command: sv reload node-exporter
+  ignore_errors: True
+
 - name: restart node-exporter
   command: sv restart node-exporter
+  ignore_errors: True

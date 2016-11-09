@@ -91,7 +91,6 @@
     - mesos-enter-ip
   tags:
     - mesos
-    - wip6
 
 - name: update docker volume plugins run files
   copy: src={{item}}.sh dest=/etc/sv/{{item}}/run mode=0755
