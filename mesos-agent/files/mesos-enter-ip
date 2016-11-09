@@ -22,4 +22,7 @@ NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[
 
 [ -n "$NSPID" ] || nopid
 
-exec nsenter -t $NSPID -m -n -p -i -u $NSCMD
+MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head )
+CHILDPID=$(ps -eo pid,ppid | grep "${MEPID}$" | awk '{print $1}' | head )
+
+exec nsenter -t $CHILDPID -m -n -p -i -u $NSCMD
