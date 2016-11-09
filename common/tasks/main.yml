@@ -1,4 +1,5 @@
 ---
+
 - name: configure hostname
   hostname: name='{{ ansible_hostname }}'
 
@@ -58,6 +59,7 @@
     - sysvinit-core
     - cgroupfs-mount
     - hdparm
+    - ca-certificates
 
 - name: create volume groups
   lvg: vg={{ item.vg }} pvs={{ item.pvs }}
