@@ -1,3 +1,4 @@
 ---
 dependencies:
   - { role: gotansible.runit }
+  - { role: common }

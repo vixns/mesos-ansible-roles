@@ -14,7 +14,7 @@
     - cni
 
 - name: install calicoctl binary
-  get_url: url=http://www.projectcalico.org/builds/calicoctl checksum=md5:da43a15564e121159485e05fed40a433 dest=/usr/bin/calicoctl.bin mode=0755
+  get_url: url=http://www.projectcalico.org/builds/calicoctl checksum=md5:fa4b2d6b3a45bdee05897c4154e2691e dest=/usr/bin/calicoctl.bin mode=0755
   tags:
     - cni
 

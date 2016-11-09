@@ -1,7 +1,7 @@
 ---
 
 - name: install felix
-  unarchive: src=https://github.com/projectcalico/felix/releases/download/1.4.3/calico-felix-1.4.3-git-0586949.tgz
+  unarchive: src=https://github.com/projectcalico/felix/releases/download/1.4.4/calico-felix-1.4.4-git-c785fdd.tgz
     dest=/opt
     copy=no
     creates=/usr/bin/calico-felix
