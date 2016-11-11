@@ -22,6 +22,11 @@
     - {dest: /etc/hosts.deny, line: 'rpcbind: ALL'}
     - {dest: /etc/hosts.allow, line: 'rpcbind: 127.0.0.1 10.0.0.0/8'}
 
+- name: setup open files soft limit
+  lineinfile: dest=/etc/security/limits.conf regexp='soft.*nofile' line='* soft nofile 65535'
+
+- name: setup open files hard limit
+  lineinfile: dest=/etc/security/limits.conf regexp='hard.*nofile' line='* hard nofile 65535'
 
 - name: configure grub cgroups
   lineinfile: dest=/etc/default/grub
