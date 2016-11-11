@@ -27,7 +27,6 @@
     - max_tasks_per_offer
     - mesos_authentication_principal
     - mesos_authentication_secret_file
-    - mesos_role
     - plugin_conf
     - plugin_dir
     - logging_level
