@@ -1,8 +1,5 @@
 ---
 
-- name: configure hostname
-  hostname: name='{{ ansible_hostname }}'
-
 - name: "Ensure /etc/hosts has fqdn"
   replace: dest=/etc/hosts regexp='{{item|regex_replace('^([^\.]+).*$', '\\1')}}.*{{item|regex_replace('^([^\.]+).*$', '\\1')}}' replace="{{item}} {{item|regex_replace('^([^\.]+).*$', '\\1')}}"
   with_items: "{{ groups['all'] }}"
