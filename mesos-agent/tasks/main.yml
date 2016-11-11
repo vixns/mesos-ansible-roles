@@ -81,7 +81,7 @@
   tags:
     - mesos
 
-- name: install docker volume plugins
+- name: install docker volume plugins and mesos scripts
   copy: src={{item}} dest=/usr/bin/{{item}} mode=0755
   with_items: 
     - docker-local-persist
@@ -89,6 +89,13 @@
     - clean-docker-store
     - mesos-enter
     - mesos-enter-ip
+  tags:
+    - mesos
+
+- name: install reload-haproxy
+  template: src={{item}}.j2 dest=/usr/bin/{{item}} mode=0755
+  with_items: 
+    - reload-haproxy
   tags:
     - mesos
 

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+IFS=$'
+'
+dn="_proxy-internal._tcp.marathon.{{mesos_domain}}"
+for entry in $(dig +short srv $dn | awk '{print $NF}')
+do
+  ip=$(dig srv +noanswer $dn | grep "$entry" | awk '{print $NF}')
+  curl -s -o /dev/null http://${ip}:9090/_mlb_signal/usr1
+done
