@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 usage () {
     echo "$0 ip [command]"
@@ -25,4 +25,9 @@ NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[
 MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head )
 CHILDPID=$(ps -eo pid,ppid | grep "${MEPID}$" | awk '{print $1}' | head )
 
-exec nsenter -t $CHILDPID -m -n -p -i -u $NSCMD
+OLD=$IFS
+IFS=$'\n'
+ENV=( $(sed 's/\x0/\n/g' /proc/$MEPID/environ) )
+IFS=$OLD
+
+exec nsenter -t $CHILDPID -m -n -p -i -r -w -u env -i - "${ENV[@]}" $NSCMD
