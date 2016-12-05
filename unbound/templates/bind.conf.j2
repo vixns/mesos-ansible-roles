@@ -4,7 +4,7 @@ server:
   access-control: 10.0.0.0/8 allow
   access-control: {{internal_ip | default(ansible_eth0.ipv4.address)}} allow
 {% for host in groups['masters'] %}
-  local-data: 'marathon.yuzu-together.com. A {{ hostvars[host].internal_ip }}'
+  local-data: '{{marathon_fqdn}}. A {{ hostvars[host].internal_ip }}'
 {% endfor %}
 {% for host in groups['all'] %}
   local-data: '{{ hostvars[host].inventory_hostname }}. A {{ hostvars[host].internal_ip }}'

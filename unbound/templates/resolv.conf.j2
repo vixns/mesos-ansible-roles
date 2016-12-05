@@ -1,2 +1,2 @@
 nameserver {{internal_ip | default(ansible_eth0.ipv4.address) }}
-domain service.{{consul_domain | default(mesos_domain)}}
+domain {% if consul_domain is defined %} service.{% endif %}{{consul_domain | default(mesos_domain)}}

@@ -18,7 +18,7 @@ NSCMD="sh"
 
 . /etc/default/mesos
 
-NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[]? | select(.name == \"vlan\") and .ip_addresses[0].ip_address == \"${1}\") |  .status .executor_pid")
+NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[]? | select(.name == \"${NETWORK:-vlan}\") and .ip_addresses[0].ip_address == \"${1}\") |  .status .executor_pid")
 
 [ -n "$NSPID" ] || nopid
 

@@ -1,32 +1,50 @@
 ---
 - name: install zookeeper
   unarchive: src=http://mirrors.ircam.fr/pub/apache/zookeeper/zookeeper-3.4.9/zookeeper-3.4.9.tar.gz creates=/opt/zookeeper-3.4.9 dest=/opt copy=no owner=root
+  tags:
+    - zk
 
 - name: add zookeeper link
   file: src=/opt/zookeeper-3.4.9 dest=/opt/zookeeper state=link
+  tags:
+    - zk
 
 - name: create exhibitor install dir
   file: state=directory path=/opt/exhibitor
+  tags:
+    - zk
 
 - name: install exhibitor artifact
   copy: src=exhibitor-1.5.6.jar dest=/opt/exhibitor/exhibitor.jar mode=0755
+  tags:
+    - zk
 
 - name: create exhibitor service dir
   file: state=directory path=/etc/sv/exhibitor
+  tags:
+    - zk
 
 - name: add exhibitor config file
   template: src=defaults.conf.j2 dest=/opt/exhibitor/defaults.conf mode=640
+  tags:
+    - zk
 
 - name: add exhibitor credentials file
   template: src=credentials.properties.j2 dest=/opt/exhibitor/credentials.properties mode=600
+  tags:
+    - zk
 
 - name: update exhibitor run file
   template: src=run.sh.j2 dest=/etc/sv/exhibitor/run mode=0755
   notify:
     - restart exhibitor
+  tags:
+    - zk
 
 - name: configure exhibitor service
   runit: name=exhibitor enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  tags:
+    - zk
 
 - name: register zookeeper on consul
   consul:
@@ -35,6 +53,8 @@
     service_port: 2181
     service_address: '{{internal_ip | default(ansible_eth0.ipv4.address)}}'
   when: consul_domain is defined
+  tags:
+    - zk
 
 - name: register exhibitor UI on consul
   when: consul_domain is defined
@@ -43,3 +63,5 @@
     service_name: exhibitor
     service_port: 8181
     service_address: '{{external_ip | default(internal_ip)}}'
+  tags:
+    - zk

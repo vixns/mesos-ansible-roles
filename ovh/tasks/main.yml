@@ -10,17 +10,13 @@
   with_items:
     - nfs-common
 
-- name: block external portmap access
-  iptables: chain=INPUT in_interface=eth0 protocol={{item}} destination_port=111 jump=DROP
-  with_items: 
-    - tcp
-    - udp
-
 - name: limit portmap access
   lineinfile: dest={{item.dest}} regexp='rpcbind' line={{item.line}}
   with_items: 
     - {dest: /etc/hosts.deny, line: 'rpcbind: ALL'}
     - {dest: /etc/hosts.allow, line: 'rpcbind: 127.0.0.1 10.0.0.0/8'}
+  tags:
+    - security
 
 - name: setup open files soft limit
   lineinfile: dest=/etc/security/limits.conf regexp='soft.*nofile' line='* soft nofile 65535'
@@ -61,12 +57,8 @@
   template: src=register-acme-cert.sh.j2 dest=/usr/bin/register-acme-cert mode=0755
 
 
-- name: limit zookeeper access
-  iptables: chain=INPUT in_interface=eth0 protocol=tcp destination_port=2181 jump=DROP
-
-- name: limit exhibitor web UI access
-  iptables: chain=INPUT in_interface=eth0 protocol=tcp destination_port=8181 jump=DROP
-
-- name: limit zookeeper JMX access
-  iptables: chain=INPUT in_interface=eth0 protocol=tcp destination_port=9999 jump=DROP
-
+- name: sysctl tuning (ovh)
+  sysctl: name={{item.key}} value={{item.val}} state=present
+  with_items:
+    - { key: net.ipv6.conf.eth0.autoconf, val: 0 }
+    - { key: net.ipv6.conf.eth0.accept_ra, val: 0 }

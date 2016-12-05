@@ -20,6 +20,7 @@
 
 - name: disable sysv openvpn service
   service: name=openvpn state=stopped enabled=no
+  ignore_errors: yes
   tags:
     - vpn
 

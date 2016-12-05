@@ -1,15 +1,20 @@
 ---
 
 - name: install felix
-  unarchive: src=https://github.com/projectcalico/felix/releases/download/1.4.4/calico-felix-1.4.4-git-c785fdd.tgz
+  unarchive: src=https://github.com/projectcalico/felix/releases/download/2.0.0-rc2/calico-felix-2.0.0-rc2.tgz
     dest=/opt
     copy=no
     creates=/usr/bin/calico-felix
   tags:
     - calico
 
+- name: remove libtinfo.so.5 from felix (ncurses bug)
+  file: path=/opt/calico-felix/libtinfo.so.5 state=absent
+  tags:
+    - calico
+
 - name: install bird
-  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.1.0/bird
+  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/bird
     dest=/usr/bin/bird
     mode=0755
     checksum=md5:1a838eac3f6b325dd85c6355bf6c9855
@@ -17,7 +22,7 @@
     - calico
 
 - name: install bird6
-  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.1.0/bird6
+  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/bird6
     dest=/usr/bin/bird6
     mode=0755
     checksum=md5:7aa58e1b0b8b74fd78bf1a251c240a1d
@@ -25,7 +30,7 @@
     - calico
 
 - name: install birdcl
-  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.1.0/birdcl
+  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/birdcl
     dest=/usr/bin/birdcl
     mode=0755
     checksum=md5:e9fa2bdd19512a287481351f12d5608e
@@ -33,7 +38,7 @@
     - calico
 
 - name: install calico-bgp-daemon
-  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.0/calico-bgp-daemon
+  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.1-rc2/calico-bgp-daemon
     dest=/usr/bin/calico-bgp-daemon
     mode=0755    
     checksum=md5:46a489b5fb6b9f17732837d2f9daa31f
@@ -41,7 +46,7 @@
     - calico
 
 - name: install gobgp
-  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.0/gobgp
+  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.1-rc2/gobgp
     dest=/usr/bin/gobgp
     mode=0755
     checksum=md5:33e5da406ce794bf71762c8e1b05c067
@@ -91,8 +96,11 @@
   tags:
     - calico
 
-- name: install confd templates
-  copy: src=confd dest=/etc/calico/
+- name: install calico config and templates
+  copy: src={{item}} dest=/etc/calico/
+  with_items:
+    - felix.cfg
+    - confd
   tags:
     - calico
 

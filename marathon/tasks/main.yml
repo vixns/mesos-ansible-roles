@@ -44,7 +44,9 @@
     - master
     - zk
     - ssl_keystore_path
-    - ssl_keystore_password    
+    - ssl_keystore_password
+    - webui_url
+    - mesos_leader_ui_url
   notify:
     - restart marathon
   tags:

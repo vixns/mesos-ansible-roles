@@ -3,8 +3,13 @@ exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise
 exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
 export IP="{{internal_ip}}"
 export HOSTNAME="{{ansible_hostname}}"
+{% if etcd_tls_clients %}
+export ETCD_KEY_FILE=/etc/etcd/client.key
+export ETCD_CERT_FILE=/etc/etcd/client.crt
+export ETCD_CA_CERT_FILE=/etc/etcd/ca.crt
+{% endif %}
 export ETCD_NODES="{% for host in groups['masters'] %}-node=http{% if etcd_tls_clients %}s{% endif %}://{{ hostvars[host].inventory_hostname }}:2379 {% endfor %}"
 sed "s/HOSTNAME/$HOSTNAME/" /etc/calico/confd/templates/bird_aggr.toml.template > /etc/calico/confd/conf.d/bird_aggr.toml
 sed "s/HOSTNAME/$HOSTNAME/" /etc/calico/confd/templates/bird6_aggr.toml.template > /etc/calico/confd/conf.d/bird6_aggr.toml
 ETCD_ENDPOINTS="{% for host in groups['masters'] %}http{% if etcd_tls_clients %}s{% endif %}://{{ hostvars[host].inventory_hostname }}:2379{% if not loop.last %},{% endif %}{% endfor %}" calico-startup
-exec /usr/bin/confd.static -confdir=/etc/calico/confd/ -interval=5 -watch $ETCD_NODES
+exec /usr/bin/confd.static -confdir=/etc/calico/confd/ -interval=5 -watch $ETCD_NODES{% if etcd_tls_clients %} -client-cert=/etc/etcd/client.crt -client-key=/etc/etcd/client.key{% endif %}

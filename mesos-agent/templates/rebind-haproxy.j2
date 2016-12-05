@@ -1,0 +1,39 @@
+#!/bin/sh
+
+function setlorule {
+  OLDRULE=$(iptables -n -t nat --line-numbers -L OUTPUT | grep -v felix | grep "tcp dpt:${1}" | awk '{print $1}')
+  if [ -z "$OLDRULE" ]
+  then
+    iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
+  else
+    iptables -t nat -R OUTPUT $OLDRULE -o lo -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
+  fi
+}
+
+function setprrule {
+  OLDRULE=$(iptables -n -t nat --line-numbers -L PREROUTING | grep -v felix | grep "tcp dpt:${1}" | awk '{print $1}')
+  if [ -z "$OLDRULE" ]
+  then
+    iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
+  else
+    iptables -t nat -R PREROUTING $OLDRULE -i eth0 -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
+  fi
+}
+
+function setrule {
+  setprrule $1
+  setlorule $1
+}
+
+IFS=$'
+'
+dn="_proxy-internal._tcp.marathon.{{mesos_domain}}"
+for entry in $(dig +short srv $dn | awk '{print $NF}')
+do
+  PROXY_IP=$(dig srv +noanswer $dn | grep "$entry" | awk '{print $NF}')
+  calicoctl get --output custom-columns=NETWORKS -n $(hostname) workloadEndpoint | grep -q $PROXY_IP
+  [ "$?" -ne "0" ] || break
+done
+
+setrule 80
+setrule 443

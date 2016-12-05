@@ -19,6 +19,7 @@ port 1194
 
 user nobody
 group nogroup
+client-to-client
 
 push "dhcp-option DOMAIN {{mesos_domain}}"
 push "route 10.{{lan_id}}.0.0 255.255.0.0"

@@ -5,4 +5,4 @@ exec /opt/node_exporter/node_exporter \
   -collector.netdev.ignored-devices="veth" \
   -collectors.enabled="conntrack,diskstats,runit,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,time,uname,vmstat" \
   -log.level=warn \
-  -web.listen-address={{internal_ip | default(ansible_eth1.ipv4.address)}}:9100
+  -web.listen-address={{internal_ip | default("0.0.0.0")}}:9100
