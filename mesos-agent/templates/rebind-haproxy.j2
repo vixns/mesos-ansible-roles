@@ -1,28 +1,13 @@
 #!/bin/sh
 
-function setlorule {
-  OLDRULE=$(iptables -n -t nat --line-numbers -L OUTPUT | grep -v felix | grep "tcp dpt:${1}" | awk '{print $1}')
-  if [ -z "$OLDRULE" ]
-  then
-    iptables -t nat -A OUTPUT -o lo -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
-  else
-    iptables -t nat -R OUTPUT $OLDRULE -o lo -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
-  fi
-}
-
-function setprrule {
-  OLDRULE=$(iptables -n -t nat --line-numbers -L PREROUTING | grep -v felix | grep "tcp dpt:${1}" | awk '{print $1}')
-  if [ -z "$OLDRULE" ]
-  then
-    iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
-  else
-    iptables -t nat -R PREROUTING $OLDRULE -i eth0 -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
-  fi
-}
-
 function setrule {
-  setprrule $1
-  setlorule $1
+  OLDRULE=$(iptables -n -t nat --line-numbers -L proxy | grep "tcp dpt:${1}" | awk '{print $1}')
+  if [ -z "$OLDRULE" ]
+  then
+    iptables -t nat -A proxy -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
+  else
+    iptables -t nat -R proxy $OLDRULE -p tcp -m tcp --dport $1 -j DNAT --to-destination $PROXY_IP:$1
+  fi
 }
 
 IFS=$'
@@ -34,6 +19,14 @@ do
   calicoctl get --output custom-columns=NETWORKS -n $(hostname) workloadEndpoint | grep -q $PROXY_IP
   [ "$?" -ne "0" ] || break
 done
+
+
+iptables -w -t nat --list proxy 2>&1 > /dev/null
+if [ $? -ne 0 ]; then
+  iptables -w -t nat -N proxy
+  iptables -w -t nat -A PREROUTING -m addrtype --dst-type LOCAL -j proxy
+  iptables -w -t nat -A OUTPUT ! -d 127.0.0.0/8 -m addrtype --dst-type LOCAL -j proxy
+fi
 
 setrule 80
 setrule 443
