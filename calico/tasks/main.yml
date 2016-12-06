@@ -13,11 +13,16 @@
   tags:
     - calico
 
+- name: link calico-iptables-plugin in the path
+  file: src=/opt/calico-felix/calico-iptables-plugin dest=/usr/bin/calico-iptables-plugin state=link
+  tags:
+    - calico
+
 - name: install bird
   get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/bird
     dest=/usr/bin/bird
     mode=0755
-    checksum=md5:1a838eac3f6b325dd85c6355bf6c9855
+    checksum=md5:aa65a3b09d5a6864a3832f9d94a77fb7
   tags:
     - calico
 
@@ -25,7 +30,7 @@
   get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/bird6
     dest=/usr/bin/bird6
     mode=0755
-    checksum=md5:7aa58e1b0b8b74fd78bf1a251c240a1d
+    checksum=md5:1858cc78b7d77a66b364cf065cdcf8b6
   tags:
     - calico
 
@@ -33,7 +38,7 @@
   get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/birdcl
     dest=/usr/bin/birdcl
     mode=0755
-    checksum=md5:e9fa2bdd19512a287481351f12d5608e
+    checksum=md5:9233f40f4d9b99ea051441c38685fb19
   tags:
     - calico
 
@@ -41,7 +46,7 @@
   get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.1-rc2/calico-bgp-daemon
     dest=/usr/bin/calico-bgp-daemon
     mode=0755    
-    checksum=md5:46a489b5fb6b9f17732837d2f9daa31f
+    checksum=md5:fa627e6c4fc03267b0c228b163b3fef2
   tags:
     - calico
 
@@ -49,7 +54,7 @@
   get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.1-rc2/gobgp
     dest=/usr/bin/gobgp
     mode=0755
-    checksum=md5:33e5da406ce794bf71762c8e1b05c067
+    checksum=md5:56482919c50fea87de294f278b42178f
   tags:
     - calico
 
