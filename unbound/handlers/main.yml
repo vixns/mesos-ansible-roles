@@ -1,2 +1,3 @@
 - name: restart unbound
+  ignore_errors: yes
   command: sv restart unbound
