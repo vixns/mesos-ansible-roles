@@ -122,7 +122,5 @@
     - { key: vm.max_map_count, val: 262144 }
 
 - name: "Build hosts file"
-  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item].internal_ip | default(hostvars[item].ansible_default_ipv4.address) }}.*$' line="{{ hostvars[item].internal_ip | default(hostvars[item].ansible_default_ipv4.address) }} {{hostvars[item].internal_fqdn | default(item)}} {{hostvars[item].ansible_hostname}}" state=present
-  when: hostvars[item].ansible_default_ipv4.address is defined
+  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item].internal_ip }} .*$' line="{{ hostvars[item].internal_ip }} {{hostvars[item].internal_fqdn | default(item)}} {{item | regex_replace('^([^\.]+)\..*$', '\\1')}}" state=present
   with_items: "{{groups['all']}}"
-
