@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 fi
 domain=$1
 shift
-sans="$*"
+sans="$(echo "$*" | tr ' ' ',')"
 
 mesos-execute \
 --master=leader.mesos.{% if consul_domain is defined %}service.{% endif %}{{consul_domain | default(mesos_domain)}}:5050 \
