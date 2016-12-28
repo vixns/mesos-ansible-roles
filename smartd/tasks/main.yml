@@ -13,5 +13,5 @@
 - name: configure smartd service
   runit: name=smartd enabled=true state=up timeout=9 user='root' auto=no has_log=no
 
-- name: disable sysv smartd service
-  service: name=smartd state=stopped enabled=no
+- name: disable sysv smartmontools service
+  service: name=smartmontools state=stopped enabled=no
