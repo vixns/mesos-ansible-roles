@@ -6,15 +6,10 @@
     - cni
 
 - name: install cni plugins
-  get_url: url=https://github.com/projectcalico/calico-cni/releases/download/v1.5.1/{{item}} dest=/opt/cni/bin/{{item}} mode=0755
+  get_url: url=https://github.com/projectcalico/calico-cni/releases/download/v1.5.5/{{item}} dest=/opt/cni/bin/{{item}} mode=0755
   with_items:
     - calico
     - calico-ipam
-  tags:
-    - cni
-
-- name: install calicoctl binary
-  get_url: url=https://github.com/projectcalico/calico-containers/releases/download/v1.0.0-rc1/calicoctl dest=/usr/bin/calicoctl.bin mode=0755
   tags:
     - cni
 
