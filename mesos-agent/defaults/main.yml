@@ -7,3 +7,4 @@ mesos_key_file: /etc/mesos/mesos.key
 mesos_ca_file: /etc/ssl/certs/ca-certificates.crt
 mesos_cert_file: /etc/mesos/mesos.pem
 mesos_extra_resources: ""
+mesos_attributes: disk:SATA
