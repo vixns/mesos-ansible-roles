@@ -64,20 +64,15 @@
   tags:
     - mesos
 
-#- name: update lib deps
-#  command: ldconfig
+#- name: install python-mesos
+#  easy_install: name='/usr/src/mesos-{{mesos_version}}/build/src/python/dist/{{ item }}-*.egg' state=present
+#  with_items:
+#    - mesos.interface
+#    - mesos.native
+#    - mesos
+#    - mesos.cli
 #  tags:
 #    - mesos
-
-- name: install python-mesos
-  easy_install: name='/usr/src/mesos-{{mesos_version}}/build/src/python/dist/{{ item }}-{{mesos_version}}-*.egg' state=present
-  with_items:
-    - mesos.interface
-    - mesos.native
-    - mesos
-    - mesos.cli
-  tags:
-    - mesos
 
 - name: install mesos-init-wrapper artifact
   copy: src=mesos-init-wrapper.sh dest=/usr/bin/mesos-init-wrapper mode=0755

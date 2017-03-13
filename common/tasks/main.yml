@@ -67,6 +67,7 @@
 - name: create logical volumes
   lvol: vg={{ item.vg }} lv={{ item.lv }} size={{ item.size }}
   with_items: "{{lvols|default([])}}"
+  ignore_errors: True
   tags:
     - disks
 
