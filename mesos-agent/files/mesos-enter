@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 usage () {
     echo "$0 pid [command]"
@@ -11,4 +11,11 @@ NSPID=$1
 NSCMD="sh"
 [ -z "$2" ] || NSCMD=$2
 
-exec nsenter -t $NSPID -m -n -p -i -u $NSCMD
+MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head )
+
+OLD=$IFS
+IFS=$'\n'
+ENV=( $(tr '\n' ' ' < /proc/$MEPID/environ | sed -e 's/\x0/\n/g') )
+IFS=$OLD
+
+exec nsenter -t $NSPID -m -n -p -i -r -w -u env -i - "${ENV[@]}" $NSCMD

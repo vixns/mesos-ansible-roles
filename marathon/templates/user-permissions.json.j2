@@ -1,0 +1,20 @@
+{
+  "users": [
+  {% for user in marathon_users %}
+    {
+      "user": "{{ user['name'] }}",
+      "password": "{{ user['secret'] }}",
+      "permissions": [
+        {% for acl in user['acls'] %}
+        {% for a in acl %}
+        {% for on in acl[a] %}
+        {"allowed": "{{ a }}", "on": "{{ on }}"}{% if not loop.last %},{% endif %}
+        {% endfor %} 
+        {% endfor %}
+        {% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+}

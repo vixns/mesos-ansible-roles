@@ -27,7 +27,7 @@ CHILDPID=$(ps -eo pid,ppid | grep "${MEPID}$" | awk '{print $1}' | head )
 
 OLD=$IFS
 IFS=$'\n'
-ENV=( $(sed 's/\x0/\n/g' /proc/$MEPID/environ) )
+ENV=( $(tr '\n' ' ' < /proc/$MEPID/environ | sed -e 's/\x0/\n/g') )
 IFS=$OLD
 
 exec nsenter -t $CHILDPID -m -n -p -i -r -w -u env -i - "${ENV[@]}" $NSCMD

@@ -62,6 +62,7 @@
   with_items:
     - log4j.properties
     - application.conf
+    - plugin.conf
   notify:
     - restart marathon
   tags:
@@ -71,9 +72,15 @@
   template: src={{item}}.j2 dest=/etc/marathon/{{item}} mode=0600
   with_items:
     - secret
-    - plugin.conf
   notify:
     - restart marathon
+  tags:
+    - marathon
+
+- name: update marathon permissions file
+  template: src={{item}}.j2 dest=/etc/marathon/{{item}} mode=0600
+  with_items:
+    - user-permissions.json
   tags:
     - marathon
 
