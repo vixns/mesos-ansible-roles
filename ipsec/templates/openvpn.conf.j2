@@ -1,0 +1,28 @@
+server 10.{{vpn_id}}.0.0 255.255.255.0
+verb 2
+#duplicate-cn
+key /etc/openvpn/pki/private/pki.key
+ca /etc/openvpn/pki/ca.crt
+cert /etc/openvpn/pki/issued/pki.crt
+dh /etc/openvpn/pki/dh.pem
+tls-auth /etc/openvpn/pki/ta.key
+key-direction 0
+keepalive 10 60
+
+persist-key
+persist-tun
+comp-lzo adaptive
+
+dev tun
+proto tcp
+port 1194
+
+user nobody
+group nogroup
+client-to-client
+
+push "dhcp-option DOMAIN {{mesos_domain}}"
+push "route 10.{{lan_id}}.0.0 255.255.0.0"
+push "route 10.{{vlan_id}}.0.0 255.255.0.0"
+push "route {{internal_ip | default(ansible_eth0.ipv4.address)}} 255.255.255.255"
+push dhcp-option DNS {{internal_ip | default(ansible_eth0.ipv4.address)}}

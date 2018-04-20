@@ -26,4 +26,4 @@
     - reload consul-template
 
 - name: configure consul-template service
-  runit: name=consul-template enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=consul-template enabled=true state=started service_dir=/etc/service

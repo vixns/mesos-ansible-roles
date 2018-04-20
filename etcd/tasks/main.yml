@@ -31,6 +31,6 @@
     - etcd
 
 - name: configure etcd service
-  runit: name=etcd enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=etcd enabled=true state=started service_dir=/etc/service
   tags:
     - etcd

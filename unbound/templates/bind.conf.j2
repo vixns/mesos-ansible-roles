@@ -5,7 +5,8 @@ server:
   access-control: {{internal_ip | default(ansible_eth0.ipv4.address)}} allow
 {% for host in groups['masters'] %}
   local-data: '{{marathon_fqdn}}. A {{ hostvars[host].internal_ip }}'
+  local-data: '{{ hostvars[host].internal_fqdn }}. A {{ hostvars[host].internal_ip }}'
 {% endfor %}
 {% for host in groups['all'] %}
-  local-data: '{{ hostvars[host].inventory_hostname }}. A {{ hostvars[host].internal_ip }}'
+  local-data-ptr: '{{ hostvars[host].internal_ip }} {{ hostvars[host].internal_fqdn }}'
 {% endfor %}

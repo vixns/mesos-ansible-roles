@@ -3,7 +3,7 @@
 - name: install packages
   apt: name={{ item }}
        state=latest
-       default_release=jessie-backports
+       default_release=stretch-backports
        install_recommends=no
        update_cache=yes
        cache_valid_time=3600
@@ -27,14 +27,14 @@
 - name: configure grub cgroups
   lineinfile: dest=/etc/default/grub
               regexp=^GRUB_CMDLINE_LINUX=
-              line='GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1 transparent_hugepage=never"'
+              line='GRUB_CMDLINE_LINUX="console=tty0 console=ttyS0,115200n8 cgroup_enable=memory swapaccount=1 transparent_hugepage=never net.ifnames=0 biosdevname=0"'
   notify:
     - update grub
 
-- name: configure grub default
-  lineinfile: dest=/etc/default/grub regexp='^GRUB_DEFAULT=' line='GRUB_DEFAULT=1'
-  notify:
-    - update grub
+#- name: configure grub default
+#  lineinfile: dest=/etc/default/grub regexp='^GRUB_DEFAULT=' line='GRUB_DEFAULT=1'
+#  notify:
+#    - update grub
 
 - name: enable interfaces.d directory
   lineinfile: dest=/etc/network/interfaces regexp='^source-directory' line='source-directory interfaces.d'
@@ -53,8 +53,8 @@
   tags:
     - eth1
 
-- name: install acme script
-  template: src=register-acme-cert.sh.j2 dest=/usr/bin/register-acme-cert mode=0755
+#- name: install acme script
+#  template: src=register-acme-cert.sh.j2 dest=/usr/bin/register-acme-cert mode=0755
 
 
 - name: sysctl tuning (ovh)

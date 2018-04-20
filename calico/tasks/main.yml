@@ -1,75 +1,76 @@
 ---
 
 - name: install felix
-  unarchive: src=https://github.com/projectcalico/felix/releases/download/2.0.4/calico-felix-2.0.4.tgz
-    dest=/opt
-    copy=no
+  get_url: url=https://github.com/projectcalico/felix/releases/download/2.6.2/calico-felix
+    dest=/usr/bin/calico-felix
+    mode=0755
+    checksum=md5:661f182bba8653a50ef3b33397efc7f1
   tags:
     - calico
 
-- name: remove libtinfo.so.5 from felix (ncurses bug)
-  file: path=/opt/calico-felix/libtinfo.so.5 state=absent
-  tags:
-    - calico
+#- name: remove libtinfo.so.5 from felix (ncurses bug)
+#  file: path=/opt/felix-2.6.2/libtinfo.so.5 state=absent
+#  tags:
+#    - calico
 
-- name: link calico-iptables-plugin in the path
-  file: src=/opt/calico-felix/calico-iptables-plugin dest=/usr/bin/calico-iptables-plugin state=link
-  tags:
-    - calico
+#- name: link calico-iptables-plugin in the path
+#  file: src=/opt/calico-felix /calico-iptables-plugin dest=/usr/bin/calico-iptables-plugin state=link
+#  tags:
+#    - calico
 
 - name: install bird
-  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/bird
+  get_url: url=https://github.com/projectcalico/bird/releases/download/v0.3.1/bird
     dest=/usr/bin/bird
     mode=0755
-    checksum=md5:aa65a3b09d5a6864a3832f9d94a77fb7
+    checksum=md5:eeb0877f9edff7662ded84b5d31c72dc
   tags:
     - calico
 
-- name: install bird6
-  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/bird6
-    dest=/usr/bin/bird6
-    mode=0755
-    checksum=md5:1858cc78b7d77a66b364cf065cdcf8b6
-  tags:
-    - calico
+#- name: install bird6
+#  get_url: url=https://github.com/projectcalico/bird/releases/download/v0.3.1/bird6
+#    dest=/usr/bin/bird6
+#    mode=0755
+#    checksum=md5:a44dbb510e5c775a4020375d6dc5c375
+#  tags:
+#    - calico
 
 - name: install birdcl
-  get_url: url=https://github.com/projectcalico/calico-bird/releases/download/v0.2.0-rc1/birdcl
+  get_url: url=https://github.com/projectcalico/bird/releases/download/v0.3.1/birdcl
     dest=/usr/bin/birdcl
     mode=0755
-    checksum=md5:9233f40f4d9b99ea051441c38685fb19
+    checksum=md5:3aad4da09cc06253db98249fdadb8a52
   tags:
     - calico
 
-- name: install calico-bgp-daemon
-  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.2/calico-bgp-daemon
-    dest=/usr/bin/calico-bgp-daemon
-    mode=0755    
-    checksum=md5:35eb4de05619af1e1785c462d484710f
-  tags:
-    - calico
+#- name: install calico-bgp-daemon
+#  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.2/calico-bgp-daemon
+#    dest=/usr/bin/calico-bgp-daemon
+#    mode=0755    
+#    checksum=md5:35eb4de05619af1e1785c462d484710f
+#  tags:
+#    - calico
 
-- name: install gobgp
-  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.2/gobgp
-    dest=/usr/bin/gobgp
-    mode=0755
-    checksum=md5:7827276edd47358e1c3de11904efbe59
-  tags:
-    - calico
+#- name: install gobgp
+#  get_url: url=https://github.com/projectcalico/calico-bgp-daemon/releases/download/v0.1.2/gobgp
+#    dest=/usr/bin/gobgp
+#    mode=0755
+#    checksum=md5:7827276edd47358e1c3de11904efbe59
+#  tags:
+#    - calico
 
 - name: install confd
-  get_url: url=https://github.com/projectcalico/confd/releases/download/v0.10.0-scale/confd.static
+  get_url: url=https://github.com/projectcalico/confd/releases/download/v0.12.1-calico-0.4.2/confd
     dest=/usr/bin/confd.static
     mode=0755
-    checksum=md5:6d5a47c3e064e69047e0c05a0b1029e5
+    checksum=md5:59dc3375fc67b2ef1cc3f6e35b8b851d
   tags:
     - calico
 
 - name: install calicoctl binary
-  get_url: url=https://github.com/projectcalico/calicoctl/releases/download/v1.0.2/calicoctl
+  get_url: url=https://github.com/projectcalico/calicoctl/releases/download/v1.6.2/calicoctl
     dest=/usr/bin/calicoctl.bin
     mode=0755
-    checksum=md5:20ccd4ad69ccb94e0d6de69baef4244f
+    checksum=md5:b9902316cef5614097e9cdcc23d396e8
   tags:
     - calico
 
@@ -86,7 +87,7 @@
 - name: install calico dependencies
   apt: name={{ item }}
        state=latest
-       default_release=jessie-backports
+       default_release=stretch-backports
        install_recommends=no
        update_cache=yes
        cache_valid_time=3600
@@ -103,7 +104,7 @@
     - /etc/sv/felix
     - /etc/sv/confd
     - /etc/sv/bird
-    - /etc/sv/bird6
+    #- /etc/sv/bird6
     - /var/run/calico
   tags:
     - calico
@@ -122,18 +123,18 @@
     - felix
     - confd
     - bird
-    - bird6
+    #- bird6
   notify:
     - restart {{item}}
   tags:
     - calico
 
 - name: configure calico services
-  runit: name={{item}} enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name={{item}} enabled=true state=started service_dir=/etc/service
   with_items:
     - felix
     - confd
     - bird
-    - bird6
+    #- bird6
   tags:
     - calico

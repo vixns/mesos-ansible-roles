@@ -2,6 +2,6 @@
 exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
 exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
 export IP="{{internal_ip}}"
-export HOSTNAME="{{ansible_hostname}}"
+export HOSTNAME="{{inventory_hostname_short}}"
 mkdir -p /run/bird
 exec /usr/bin/bird -R -s /run/bird/bird.ctl -d -c /etc/calico/confd/config/bird.cfg

@@ -1,4 +1,3 @@
 ---
 dependencies:
-  - { role: gotansible.runit }
   - { role: mesos }

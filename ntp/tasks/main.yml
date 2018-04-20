@@ -1,6 +1,6 @@
 ---
 - name: install openntpd
-  apt: name=openntpd state=latest default_release=jessie-backports install_recommends=no
+  apt: name=openntpd state=latest default_release=stretch-backports install_recommends=no
   tags:
     - ntp
 
@@ -22,6 +22,6 @@
     - ntp
 
 - name: configure ntp service
-  runit: name=ntp enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=ntp enabled=true state=started service_dir=/etc/service
   tags:
     - ntp

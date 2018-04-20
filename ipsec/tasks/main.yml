@@ -1,0 +1,62 @@
+---
+- name: install openvpn
+  apt: name={{item}} state=latest install_recommends=no
+  with_items: 
+    - strongswan
+    - strongswan-ikev2
+    - libcharon-extra-plugins
+    - libstrongswan-standard-plugins
+  tags:
+    - vpn
+
+
+# dossier /etc/ipsec.d/ avec la pki et les clés
+# fichier /etc/ipsec.secrets /etc/ipsec.conf /etc/strongswan.d/charon/eap-radius.conf
+
+- name: update ipsec.secrets
+  template: src=ipsec.secrets.j2 dest=/etc/ipsec.secrets mode=0600
+  notify:
+    - restart ipsec
+  tags:
+    - vpn
+
+- name: update ipsec.conf
+  template: src=ipsec.conf.j2 dest=/etc/ipsec.conf mode=0640
+  notify:
+    - restart ipsec
+  tags:
+    - vpn
+
+
+- name: update eap-radius.conf
+  template: src=eap-radius.conf.j2 dest=/etc/strongswan.d/charon/eap-radius.conf mode=0640
+  notify:
+    - restart ipsec
+  tags:
+    - vpn
+
+- name: disable sysv ipsec service
+  service: name=ipsec state=stopped enabled=no
+  ignore_errors: yes
+  tags:
+    - vpn
+
+- name: create ipsec service dir
+  file: state=directory path={{item}}
+  with_items:
+    - /etc/sv/ipsec
+    - /etc/ipsec.conn.d
+  tags:
+    - vpn
+
+- name: update ipsec run file
+  copy: src=run.sh dest=/etc/sv/ipsec/run mode=0755
+  notify:
+    - restart ipsec
+  tags:
+    - vpn
+
+- name: configure ipsec service
+  runit: name=ipsec enabled=true state=started service_dir=/etc/service
+  tags:
+    - vpn

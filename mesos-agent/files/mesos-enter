@@ -1,21 +1,51 @@
 #!/bin/bash
 
+
 usage () {
-    echo "$0 pid [command]"
+    echo "$0 name [command]"
     exit 1
 }
 
 [ -n "$1" ] || usage
-NSPID=$1
+NAME=$1
 
 NSCMD="sh"
 [ -z "$2" ] || NSCMD=$2
 
-MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head )
+nopid () {
+    echo "cannot find pid for ${NAME}"
+    exit 1
+}
+
+. /etc/default/mesos
+
+NAMEANDPIDS=$(curl -s ${IP}:5051/containers | jq ".| map(select(.executor_id | match(\"${NAME}\"; \"g\"))) |  map({id: .executor_id, pid: .status .executor_pid})")
+
+LEN=$(echo $NAMEANDPIDS | jq ". | length")
+
+if [ $LEN -eq 0 ]
+then
+    echo "no match"
+    exit 1
+fi
+
+if [ $LEN -gt 1 ]
+then
+    echo "more than one possibility, use one of these:"
+    echo $NAMEANDPIDS | jq -r ".[] .id | split(\".\")[0]"
+    exit 1
+fi
+
+NSPID=$(echo $NAMEANDPIDS | jq -r ".[] .pid")
+
+[ -n "$NSPID" ] || nopid
+
+MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head -n 1)
+CHILDPID=$(ps -eo pid,ppid | grep "${MEPID}$" | awk '{print $1}' | head -n 1)
 
 OLD=$IFS
 IFS=$'\n'
 ENV=( $(tr '\n' ' ' < /proc/$MEPID/environ | sed -e 's/\x0/\n/g') )
 IFS=$OLD
 
-exec nsenter -t $NSPID -m -n -p -i -r -w -u env -i - "${ENV[@]}" $NSCMD
+exec nsenter -t $CHILDPID -m -n -p -i -r -w -u env -i - "${ENV[@]}" $NSCMD

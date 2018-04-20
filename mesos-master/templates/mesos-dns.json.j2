@@ -2,7 +2,7 @@
   "zk": "{{ zk_uri }}/mesos",
   "masters": [
   {% for host in groups['masters'] %}
-  "{{ hostvars[host].inventory_hostname }}:5050"{% if not loop.last %},{% endif %}
+  "{{ hostvars[host].internal_fqdn }}:5050"{% if not loop.last %},{% endif %}
   {% endfor %}
   ],
   "refreshSeconds": 10,

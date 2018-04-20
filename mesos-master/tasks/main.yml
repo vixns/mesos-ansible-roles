@@ -48,7 +48,7 @@
     - mesos
 
 - name: configure mesos-master service
-  runit: name=mesos-master enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=mesos-master enabled=true state=started service_dir=/etc/service
   tags:
     - mesos
 
@@ -73,6 +73,6 @@
     - mesos
 
 - name: configure mesos-dns service
-  runit: name=mesos-dns enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=mesos-dns enabled=true state=started service_dir=/etc/service
   tags:
     - mesos

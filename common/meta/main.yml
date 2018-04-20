@@ -1,4 +1,3 @@
 ---
 dependencies:
-  - { role: jacoelho.softwareraid }  
-  - { role: gotansible.runit }
+  - { role: jacoelho.softwareraid }

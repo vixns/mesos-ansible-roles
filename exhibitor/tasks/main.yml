@@ -1,11 +1,11 @@
 ---
 - name: install zookeeper
-  unarchive: src=http://mirrors.ircam.fr/pub/apache/zookeeper/zookeeper-3.4.9/zookeeper-3.4.9.tar.gz creates=/opt/zookeeper-3.4.9 dest=/opt copy=no owner=root
+  unarchive: src=http://mirrors.ircam.fr/pub/apache/zookeeper/zookeeper-3.4.11/zookeeper-3.4.11.tar.gz creates=/opt/zookeeper-3.4.11 dest=/opt copy=no owner=root
   tags:
     - zk
 
 - name: add zookeeper link
-  file: src=/opt/zookeeper-3.4.9 dest=/opt/zookeeper state=link
+  file: src=/opt/zookeeper-3.4.11 dest=/opt/zookeeper state=link
   tags:
     - zk
 
@@ -42,7 +42,7 @@
     - zk
 
 - name: configure exhibitor service
-  runit: name=exhibitor enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=exhibitor enabled=true state=started service_dir=/etc/service
   tags:
     - zk
 

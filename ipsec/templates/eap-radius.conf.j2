@@ -1,0 +1,15 @@
+eap-radius {
+	class_group = yes
+	close_all_on_timeout = yes
+	load = yes
+	secret = {{ipsec_radius_secret}}
+	server = {{ipsec_radius_fqdn}}
+	dae {
+	}
+	forward {
+	}
+    servers {
+    }
+    xauth {
+    }
+}

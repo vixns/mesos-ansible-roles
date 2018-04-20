@@ -14,7 +14,7 @@
     - mesos
 
 - name: install packages
-  apt: name={{ item }} state=latest default_release=jessie-backports install_recommends=no update_cache=yes cache_valid_time=3600
+  apt: name={{ item }} state=latest default_release=stretch-backports install_recommends=no update_cache=yes cache_valid_time=3600
   with_items:
     - build-essential
     - python-dev
@@ -60,7 +60,8 @@
   command: 'make -j {{ansible_processor_cores}} -l {{ansible_processor_cores - 1}} V=0 install'
   args:
     chdir: '/usr/src/mesos-{{mesos_version}}/build'
-    creates: '/usr/lib/libmesos-{{mesos_version}}.so'
+    #creates: '/usr/lib/libmesos-{{mesos_version}}.so'
+    creates: '/usr/lib/libmesos.so'
   tags:
     - mesos
 

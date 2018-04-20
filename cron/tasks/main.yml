@@ -1,6 +1,6 @@
 ---
 - name: install cron
-  apt: name=cron state=latest default_release=jessie-backports install_recommends=no
+  apt: name=cron state=latest default_release=stretch-backports install_recommends=no
 
 - name: create cron service dir
   file: state=directory path=/etc/sv/cron
@@ -11,7 +11,7 @@
     - restart cron
 
 - name: configure cron service
-  runit: name=cron enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=cron enabled=true state=started service_dir=/etc/service
 
 - name: disable sysv cron service
   service: name=cron state=stopped enabled=no

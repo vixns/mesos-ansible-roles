@@ -1,10 +1,10 @@
 #!/bin/bash
 exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
 exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
-exec /usr/bin/etcd --name {{ansible_hostname}} --initial-advertise-peer-urls http://{{inventory_hostname}}:2380 \
+exec /usr/bin/etcd --name {{inventory_hostname_short}} --initial-advertise-peer-urls http://{{inventory_hostname}}:2380 \
   --listen-peer-urls http://{{inventory_hostname }}:2380,http://[{{ansible_default_ipv6.address}}]:2380 \
   --listen-client-urls http://{{inventory_hostname }}:2379,http://[{{ansible_default_ipv6.address}}]:2379,http://127.0.0.1:2379 \
   --advertise-client-urls http://{{inventory_hostname}}:2379 \
   --initial-cluster-token {{ etcd_cluster_token }} \
-  --initial-cluster {% for host in groups['masters'] %}{{hostvars[host].ansible_hostname}}=http://{{ hostvars[host].inventory_hostname }}:2380{% if not loop.last %},{% endif %}{% endfor %} \
+  --initial-cluster {% for host in groups['masters'] %}{{hostvars[host].inventory_hostname_short}}=http://{{ hostvars[host].inventory_hostname }}:2380{% if not loop.last %},{% endif %}{% endfor %} \
   --initial-cluster-state new 

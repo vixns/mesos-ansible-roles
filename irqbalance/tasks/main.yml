@@ -1,6 +1,6 @@
 ---
 - name: install irqbalance
-  apt: name=irqbalance state=latest default_release=jessie-backports install_recommends=no
+  apt: name=irqbalance state=latest default_release=stretch-backports install_recommends=no
   tags:
     - irqbalance
     
@@ -17,7 +17,7 @@
     - irqbalance
 
 - name: configure irqbalance service
-  runit: name=irqbalance enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=irqbalance enabled=true state=started service_dir=/etc/service
   tags:
     - irqbalance
 

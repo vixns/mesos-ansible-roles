@@ -3,34 +3,20 @@
 - name: "Ensure /etc/hosts has fqdn"
   replace: dest=/etc/hosts regexp='{{item|regex_replace('^([^\.]+).*$', '\\1')}}.*{{item|regex_replace('^([^\.]+).*$', '\\1')}}' replace="{{item}} {{item|regex_replace('^([^\.]+).*$', '\\1')}}"
   with_items: "{{ groups['all'] }}"
+  tags:
+    - common
 
-- name: add mesosphere apt key
-  apt_key: keyserver=keyserver.ubuntu.com id=E56151BF
-- name: add mesosphere apt repo
+
+- name: add stretch-backports apt repo
   apt_repository: state=present
                   update_cache=yes
-                  repo='deb http://repos.mesosphere.io/debian jessie main'
-                  filename='mesosphere'
-
-- name: add vixns apt key
-  apt_key: url=http://apt.vixns.net/vixns.gpg state=present
-
-- name: add vixns apt repo
-  apt_repository: state=present
-                  update_cache=yes
-                  repo='deb http://apt.vixns.net jessie contrib non-free main'
-                  filename='vixns'
-
-- name: add jessie-backports apt repo
-  apt_repository: state=present
-                  update_cache=yes
-                  repo='deb http://http.debian.net/debian jessie-backports contrib non-free main'
+                  repo='deb http://http.debian.net/debian stretch-backports contrib non-free main'
                   filename='backports'
 
 - name: install packages
   apt: name={{ item }}
        state=latest
-       default_release=jessie-backports
+       default_release=stretch-backports
        install_recommends=no
        update_cache=yes
        cache_valid_time=3600
@@ -40,7 +26,7 @@
     - firmware-linux
     - firmware-netxen
     - firmware-realtek
-    - openjdk-8-jdk
+    - openjdk-8-jdk-headless
     - unzip
     - curl
     - python-pip
@@ -75,7 +61,7 @@
   filesystem: fstype={{item.fstype | default('ext4')}} dev={{item.device}} opts={{item.fsoptions | default('')}} resizefs=yes
   with_items: "{{mount_points|default([])}}"
   tags:
-    - disks
+    - disks2
 
 - name: mount disks
   mount: name={{ item.dest }}
@@ -123,5 +109,7 @@
     - { key: vm.max_map_count, val: 262144 }
 
 - name: "Build hosts file"
-  lineinfile: dest=/etc/hosts regexp='^{{ hostvars[item].internal_ip }} .*$' line="{{ hostvars[item].internal_ip }} {{hostvars[item].internal_fqdn | default(item)}} {{item | regex_replace('^([^\.]+)\..*$', '\\1')}}" state=present
-  with_items: "{{groups['all']}}"
+  lineinfile: dest=/etc/hosts regexp='^{{ internal_ip }} .*$' line="{{ internal_ip }} {{internal_fqdn}} {{internal_fqdn | regex_replace('^([^\.]+)\..*$', '\\1')}}" state=present
+  tags:
+    - common
+

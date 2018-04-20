@@ -2,7 +2,10 @@
 exec 1> >(exec logger -p user.info -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
 exec 2> >(exec logger -p user.err -t "$(basename $(pwd))[$(cat $(pwd)/supervise/pid)]")
 exec /opt/node_exporter/node_exporter \
-  -collector.netdev.ignored-devices="veth" \
-  -collectors.enabled="conntrack,diskstats,runit,entropy,filefd,filesystem,loadavg,mdadm,meminfo,netdev,netstat,sockstat,stat,time,uname,vmstat" \
-  -log.level=warn \
-  -web.listen-address={{internal_ip | default("0.0.0.0")}}:9100
+  --collector.netdev.ignored-devices="^(veth.*|cali.*)$" \
+  --collector.filesystem.ignored-fs-types="^((sys|proc|auto|ns)fs|overlay)$"
+  --collector.runit \
+  --no.collector.arp \
+  --no.collector.wifi \
+  --log.level=warn \
+  --web.listen-address={{internal_ip | default("0.0.0.0")}}:9100

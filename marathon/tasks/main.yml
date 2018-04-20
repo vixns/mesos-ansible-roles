@@ -109,6 +109,6 @@
     - marathon
 
 - name: configure marathon service
-  runit: name=marathon enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=marathon enabled=true state=started service_dir=/etc/service
   tags:
     - marathon

@@ -9,7 +9,7 @@ shift
 sans="$(echo "$*" | tr ' ' ',')"
 
 mesos-execute \
---master=leader.mesos.{% if consul_domain is defined %}service.{% endif %}{{consul_domain | default(mesos_domain)}}:5050 \
+--master=leader.{% if consul_domain is defined %}mesos.service.{% endif %}{{consul_domain | default(mesos_domain)}}:5050 \
 --name=acme \
 --networks=vlan \
 --docker_image=vixns/getssl \

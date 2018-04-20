@@ -1,6 +1,6 @@
 ---
 - name: install openvpn
-  apt: name={{item}} state=latest default_release=jessie-backports install_recommends=no
+  apt: name={{item}} state=latest default_release=stretch-backports install_recommends=no
   with_items: 
     - openvpn
   tags:
@@ -40,6 +40,6 @@
     - vpn
 
 - name: configure openvpn service
-  runit: name=openvpn enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=openvpn enabled=true state=started service_dir=/etc/service
   tags:
     - vpn

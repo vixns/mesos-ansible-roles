@@ -1,6 +1,6 @@
 ---
 - name: install unbound
-  apt: name=unbound state=latest default_release=jessie-backports install_recommends=no
+  apt: name=unbound state=latest default_release=stretch-backports install_recommends=no
   tags:
     - unbound
 
@@ -44,7 +44,7 @@
     - unbound
 
 - name: configure unbound service
-  runit: name=unbound enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=unbound enabled=true state=started service_dir=/etc/service
   tags:
     - unbound
 

@@ -18,12 +18,12 @@ NSCMD="sh"
 
 . /etc/default/mesos
 
-NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[]? | select(.name == \"${NETWORK:-vlan}\") and .ip_addresses[0].ip_address == \"${1}\") |  .status .executor_pid")
+NSPID=$(curl -s ${IP}:5051/containers | jq ".[] | select(.status .network_infos[]? | select(.ip_addresses[0].ip_address == \"${1}\")) |  .status .executor_pid")
 
 [ -n "$NSPID" ] || nopid
 
-MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head )
-CHILDPID=$(ps -eo pid,ppid | grep "${MEPID}$" | awk '{print $1}' | head )
+MEPID=$(ps -eo pid,ppid | grep "${NSPID}$" | awk '{print $1}' | head -n 1)
+CHILDPID=$(ps -eo pid,ppid | grep "${MEPID}$" | awk '{print $1}' | head -n 1)
 
 OLD=$IFS
 IFS=$'\n'

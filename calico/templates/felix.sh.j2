@@ -13,4 +13,4 @@ export FELIX_ETCDCERTFILE=$ETCD_CERT_FILE
 export ETCD_AUTHORITY="{% for host in groups['masters'] %}http{% if etcd_tls_clients %}s{% endif %}://{{ hostvars[host].inventory_hostname }}:2379{% if not loop.last %},{% endif %}{% endfor %}"
 export FELIX_ETCDENDPOINTS="$ETCD_AUTHORITY"
 export FELIX_FAILSAFEINBOUNDHOSTPORTS="22,2222"
-exec /opt/calico-felix/calico-felix
+exec /usr/bin/calico-felix

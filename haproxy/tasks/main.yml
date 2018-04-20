@@ -1,6 +1,6 @@
 ---
 - name: install haproxy
-  apt: name=haproxy state=latest default_release=jessie-backports install_recommends=no update_cache=yes cache_valid_time=3600
+  apt: name=haproxy state=latest default_release=stretch-backports install_recommends=no update_cache=yes cache_valid_time=3600
 
 - name: create haproxy service dir
   file: state=directory path=/etc/sv/haproxy
@@ -27,7 +27,7 @@
     - haproxy
 
 - name: configure haproxy service
-  runit: name=haproxy enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=haproxy enabled=true state=started service_dir=/etc/service
   tags:
     - haproxy
 

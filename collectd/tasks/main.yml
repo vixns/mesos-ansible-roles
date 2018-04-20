@@ -49,5 +49,5 @@
       - restart collectd
 
 - name: add collectd runit service
-  runit: name=collectd enabled=true state=up timeout=9 user='root' auto=no has_log=no
+  runit: name=collectd enabled=true state=started service_dir=/etc/service
   
