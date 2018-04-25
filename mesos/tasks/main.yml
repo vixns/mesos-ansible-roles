@@ -49,7 +49,7 @@
     - mesos
 
 - name: configure mesos build
-  command: ../configure --enable-ssl --enable-libevent --prefix=/usr --enable-optimize --enable-silent-rules --enable-xfs-disk-isolator
+  command: ../configure --enable-ssl --enable-libevent --prefix=/usr --enable-optimize --enable-silent-rules --enable-xfs-disk-isolator --enable-grpc
   args:
     chdir: '/usr/src/mesos-{{mesos_version}}/build'
     creates: '/usr/src/mesos-{{mesos_version}}/build/Makefile'
