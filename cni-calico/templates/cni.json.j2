@@ -1,11 +1,10 @@
 {
-    "cniVersion": "0.2.0",
 {% if etcd_tls_clients %}
     "etcd_ca_cert_file":"/etc/etcd/ca.crt",
     "etcd_cert_file":"/etc/etcd/client.crt",
     "etcd_key_file":"/etc/etcd/client.key",
 {% endif %}
-    "etcd_endpoints": "{% for host in groups['masters'] %}http{% if etcd_tls_clients %}s{% endif %}://{{ hostvars[host].inventory_hostname }}:2379{% if not loop.last %},{% endif %}{% endfor %}",
+    "etcd_endpoints": "{% for host in groups['masters'] %}http{% if etcd_tls_clients %}s{% endif %}://{% if etcd_tls_clients %}{{ hostvars[host].inventory_hostname }}{% else %}{{ hostvars[host].internal_fqdn }}{% endif %}:2379{% if not loop.last %},{% endif %}{% endfor %}",
     "ipam": {
         "type": "calico-ipam"
     },
