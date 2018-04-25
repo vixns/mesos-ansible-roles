@@ -2,12 +2,12 @@
 #mesos-agent --resources=file:///etc/mesos/resources.json --attributes=type:agent 
 
 - name: download hadoop binaries
-  unarchive: src=http://mirrors.ircam.fr/pub/apache/hadoop/common/hadoop-2.7.2/hadoop-2.7.2.tar.gz dest=/opt copy=no owner=root creates=/opt/hadoop-2.7.2
+  unarchive: src=http://mirrors.ircam.fr/pub/apache/hadoop/common/hadoop-2.7.6/hadoop-2.7.6.tar.gz dest=/opt copy=no owner=root creates=/opt/hadoop-2.7.6
   tags:
     - mesos
 
 - name: add hadoop link
-  file: src=/opt/hadoop-2.7.2 dest=/opt/hadoop state=link
+  file: src=/opt/hadoop-2.7.6 dest=/opt/hadoop state=link
   tags:
     - mesos
 
